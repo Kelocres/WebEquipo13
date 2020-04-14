@@ -4,9 +4,10 @@ let aboutState = {
 };
 
 let authors;
+let btnBack;
 
 function loadAboutAssets() {
-    game.load.image('backButton', 'assets/imgs/back.png');    //la dirección de la imagen del botón de volver
+    game.load.image('botonback', 'assets/imgs/back.png');
 }
 
 function showInstructions() {
@@ -69,7 +70,7 @@ function showInstructions() {
     instrucText.wordWrap = true;
     instrucText.wordWrapWidth = game.world.width - 60;
 
-    let btnPlay = game.add.button(game.world.width / 2, game.world.height - 60, 'backButton',
+    let btnPlay = game.add.button(game.world.width / 2, game.world.height - 60, 'botonback',
         onBackButtonPressed);
     btnPlay.anchor.setTo(0.5, 0.5);
 }
