@@ -13,17 +13,17 @@ function loadAboutAssets() {
 function showInstructions() {
     game.add.image(0, 0, 'bg');
 
-    let textTitle = 'PROYECTO EQUIPO COHETE';
+    let textTitle = 'GAME ABOUT FALLING';
     let styleTitle = {
         font: 'Rammetto One',
         fontSize: '20pt',
         fontWeight: 'bold',
         fill: '#b60404'
     };
-    game.add.text(75, 25, textTitle, styleTitle);
+    game.add.text(55, 25, textTitle, styleTitle);
 
-    let credits = 'En colaboración con Marvel Estudios...\n';
-    game.add.text(125, game.world.height / 6, credits, {
+    let credits = 'Make the ball go as\nfast as possible to the\nbottom and avoidall \nthe obstacles';
+    game.add.text(25, game.world.height / 6, credits, {
         font: 'bold 26pt FerrumExtracondensed',
         fill: '#b60404'
     });
@@ -33,7 +33,7 @@ function showInstructions() {
         font: 'bold 20pt Sniglet',
         fill: '#b60404'
     };
-    game.add.text(125, game.world.height / 6 + 60, msgAuthors, styleAuthors);
+    game.add.text(125, game.world.height / 2 , msgAuthors, styleAuthors);
 
     authors = game.add.group();
     authors.inputEnableChildren = true;
@@ -44,32 +44,17 @@ function showInstructions() {
         fill: '#b60404'
     };
 
-    let author = game.add.text(175, game.world.height / 6 + 110, 'Miguel Ángel Buigues Ros',
+    let author = game.add.text(25, game.world.height / 2 + 50, 'Miguel Ángel Buigues Ros',
         styleSingleAuthor);
     authors.add(author);
-    author = game.add.text(175, game.world.height / 6 + 150, 'Juan Luis Moreno Escolástico',
+    author = game.add.text(25, game.world.height / 2 + 90, 'Dominik Konrad Kwiek',
         styleSingleAuthor);
     authors.add(author);
-    author = game.add.text(175, game.world.height / 6 + 190, 'Jaime Alfaro Guzman',
+    author = game.add.text(25, game.world.height / 2 + 130, 'David Ballesta Perez',
         styleSingleAuthor);
     authors.add(author);
 
-    let instructions = 'Aquí van las instrucciones';
-    instructions += '';
-    instructions += '';
-    instructions += '';
-    instructions += '';
-
-    let instrucText = game.add.text(0, 0, instructions, {
-        font: '14pt Sniglet',
-        fill: '#b60404'
-    });
-    instrucText.setTextBounds(30, game.world.height - 170, game.world.width - 60);
-    instrucText.boundsAlignH = 'center';
-    instrucText.boundsAlignV = 'middle';
-    instrucText.wordWrap = true;
-    instrucText.wordWrapWidth = game.world.width - 60;
-
+    6988888
     let btnPlay = game.add.button(game.world.width / 2, game.world.height - 60, 'botonback',
         onBackButtonPressed);
     btnPlay.anchor.setTo(0.5, 0.5);
