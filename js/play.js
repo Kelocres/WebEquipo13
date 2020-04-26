@@ -39,6 +39,8 @@ function createPlay(){
 function updatePlay(){
     managePlayerVelocity();
     manageBlockMovement();
+
+    game.physics.arcade.overlap(player,blocks,playerHitsBlock,null,this);
 }
 
 function createPlayer(){
@@ -81,7 +83,12 @@ function managePlayerVelocity(){
 
 }
 
-function manageBlockMovement(){
+function playerHitsBlock(){
+    //Que tanto en personaje como los bloques tengan colliders muy finos podrian solucionar el problema de que rebote si da en un lado del bloque
+
+}
+
+function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, hacer que no se puedan movel los bloques
    if(cursorLeft.justDown){
         blocks.forEach(moveLeftBlock);
     }
