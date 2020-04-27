@@ -1,18 +1,24 @@
 
+const ACELERACION = 0.05; // aceleracion del player
+const BOUNCE_CONSTANT = 0.6; // indice de rebote
 const NUM_BLOCKS = 7;
+const BLOCK_SPEED = 3; // velocidad a la que los bloque se mueven
+const initBlockX = 80;// width of the block
+const initBlockY = 450; //400 + half height of the block
 let haveToPutNoBlock = true;
-let blockX = -30;
-let blockY = 50;
+let blockX = -40;
 let blockPos = 1;
+let blocks;
+let notMoving = false;
+
 
 let player;
 let playerAcceleration;
 let playerVelocity;
 let playerName;
 
+let velocidad = 4; // velocidad del player
 let levelConfig;
-
-let blocks;
 
 let playState = {
     preload: preloadPlay,
@@ -31,16 +37,19 @@ function createPlay(){
     createPlayer();
     createKeyControls();
     createBlock();
+
     game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
 
+
+    game.physics.startSystem(Phaser.Physics.ARCADE);
 
 }
 
 function updatePlay(){
     managePlayerVelocity();
     manageBlockMovement();
-
-    game.physics.arcade.overlap(player,blocks,playerHitsBlock,null,this);
+    backToMove();
+    game.physics.arcade.collide(player, blocks,playerHitsBlock,null,this);
 }
 
 function createPlayer(){
@@ -57,6 +66,7 @@ function createPlayer(){
 function createBlock(){
     blocks = game.add.group();
     blocks.enableBody = true;
+    game.physics.arcade.enable(blocks);
     blocks.createMultiple(NUM_BLOCKS, 'bloque');
     blocks.forEach(setUpBlock, this);
 }
@@ -70,9 +80,12 @@ function setUpBlock(){
             haveToPutNoBlock = false;
         }
         else{
-            item.reset(blockX, blockY);
+            item.reset(blockX, 60);
+            item.body.checkCollision.left = true;
+            item.body.checkCollision.up = true;
+            item.body.checkCollision.right = true;
         }
-        blockX+= 60;
+        blockX+= initBlockX;
         blockPos++;
     }
         
@@ -80,44 +93,47 @@ function setUpBlock(){
 
 
 function managePlayerVelocity(){
-
+    
+    player.body.y += velocidad; 
+    velocidad += ACELERACION;
 }
 
-function playerHitsBlock(){
+function playerHitsBlock(player, block){
     //Que tanto en personaje como los bloques tengan colliders muy finos podrian solucionar el problema de que rebote si da en un lado del bloque
-
+    if(block.body.touching.up == true){
+        velocidad*=-BOUNCE_CONSTANT;
+    } 
+    else{
+        notMoving = true;
+    }
 }
 
 function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, hacer que no se puedan movel los bloques
-   if(cursorLeft.justDown){
-        blocks.forEach(moveLeftBlock);
-    }
-    if(cursorRigh.justDown){
-        blocks.forEach(moveRightBlock);      
-    }
+    if(!notMoving){
+        if(cursorLeft.isDown){
+            blocks.forEach(function(block){
+                block.body.x -= BLOCK_SPEED;
+                if(block.body.x < -initBlockX){
+                     block.body.x += 400 + 2*initBlockX; // += para ajustar su verdadera posicion en relacion con lo demas boques
+                }
+            });
+        }
+        if(cursorRigh.isDown){
+            blocks.forEach(function(block){
+                block.body.x += BLOCK_SPEED;
+                if(block.body.x > 400 + initBlockX){
+                    let aux = 400 + initBlockX - block.body.x;
+                    block.body.x = -initBlockX - aux;
+                }
+            });      
+        }
+    }  
 }
 
-function moveLeftBlock(block){
-   block.body.x -= 60;
-   if(block.body.x < -30){
-        block.body.x = 400 + block.body.x;
-   }/*
-   else if(block.body.x < 400 && block.body.x > 370){
-       let newBlock = game.add.sprite(block.body.x+60, block.body.y, "bloque");
-       blocks.add(newBlock);
-   }*/
-
-}
-
-function moveRightBlock(block){
-    block.body.x += 60;
-    if(block.body.x > 430){
-        delete(block);
+function backToMove(){
+    if(notMoving && player.body.y > 60){
+        notMoving = false;
     }
-   /* else if(block.body.x > 370){
-        let newBlock = game.add.sprite(400-block.body.x, block.body.y, "bloque");
-        blocks.add(newBlock);
-    }*/
 }
 
 
