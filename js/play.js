@@ -1,23 +1,21 @@
 
-const ACELERACION = 0.05; // aceleracion del player
-const BOUNCE_CONSTANT = 0.6; // indice de rebote
+const BOUNCE_CONSTANT = -100; // indice de rebote
 const NUM_BLOCKS = 7;
 const BLOCK_SPEED = 3; // velocidad a la que los bloque se mueven
 const initBlockX = 80;// width of the block
 const initBlockY = 450; //400 + half height of the block
+
 let haveToPutNoBlock = true;
 let blockX = -40;
 let blockPos = 1;
 let blocks;
-let notMoving = false;
-
+let blockMovementDissabled = false;
 
 let player;
-let playerAcceleration;
-let playerVelocity;
+//let playerVelocity = 4;
+let playeracceleration = 1;
 let playerName;
 
-let velocidad = 4; // velocidad del player
 let levelConfig;
 
 let playState = {
@@ -56,8 +54,8 @@ function createPlayer(){
     player = game.add.sprite(200,30,'player');
     game.physics.arcade.enable(player);
     game.camera.bounds = (800,600);
-    game.camera.follow(player);//Luego hay que cambiar a que solo siga al pesonaje cuando cae y añadir que personaje no esté en el centro
-    //Puede que por deadZone
+    game.camera.follow(player);
+    game.camera.deadzone = new Phaser.Rectangle(0, 100, 800, 67);
     //https://phaser.io/examples/v2/camera/deadzone
     
 }
@@ -84,6 +82,7 @@ function setUpBlock(){
             item.body.checkCollision.left = true;
             item.body.checkCollision.up = true;
             item.body.checkCollision.right = true;
+            item.body.immovable =true;
         }
         blockX+= initBlockX;
         blockPos++;
@@ -94,23 +93,23 @@ function setUpBlock(){
 
 function managePlayerVelocity(){
     
-    player.body.y += velocidad; 
-    velocidad += ACELERACION;
+    player.body.velocity.y += playeracceleration; 
+    //playerVelocity += playeracceleration;
 }
 
 function playerHitsBlock(player, block){
     //Que tanto en personaje como los bloques tengan colliders muy finos podrian solucionar el problema de que rebote si da en un lado del bloque
     if(block.body.touching.up == true){
-        velocidad*=-BOUNCE_CONSTANT;
+        player.body.velocity.y =BOUNCE_CONSTANT;
     } 
     else{
-        notMoving = true;
+        blockMovementDissabled = true;
     }
 }
 
 function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, hacer que no se puedan movel los bloques
-    if(!notMoving){
-        if(cursorLeft.isDown){
+    if(!blockMovementDissabled){
+        if(cursorRigh.isDown){
             blocks.forEach(function(block){
                 block.body.x -= BLOCK_SPEED;
                 if(block.body.x < -initBlockX){
@@ -118,7 +117,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
                 }
             });
         }
-        if(cursorRigh.isDown){
+        if(cursorLeft.isDown){
             blocks.forEach(function(block){
                 block.body.x += BLOCK_SPEED;
                 if(block.body.x > 400 + initBlockX){
@@ -131,8 +130,8 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
 }
 
 function backToMove(){
-    if(notMoving && player.body.y > 60){
-        notMoving = false;
+    if(blockMovementDissabled && player.body.y > 60){
+        blockMovementDissabled = false;
     }
 }
 
