@@ -53,6 +53,7 @@ function updatePlay(){
 function createPlayer(){
     player = game.add.sprite(200,30,'player');
     game.physics.arcade.enable(player);
+    player.body.immovable =true;
     game.camera.bounds = (800,600);
     game.camera.follow(player);
     game.camera.deadzone = new Phaser.Rectangle(0, 100, 800, 67);
