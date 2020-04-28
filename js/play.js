@@ -12,9 +12,13 @@ let blocks;
 let blockMovementDissabled = false;
 
 let player;
+let playerLife;
 //let playerVelocity = 4;
-let playeracceleration = 1;
-let playerName;
+let playerAcceleration = 1;
+let playerName ="randomSlime";
+
+let containerLifeBar;
+let lifeBar;
 
 let levelConfig;
 
@@ -27,12 +31,22 @@ let playState = {
 function preloadPlay(){
     game.load.spritesheet('player','assets/imgs/Slime/Slime 16x16.png', 16, 16);
     game.load.spritesheet('enviroment','assets/imgs/Enviroment/Assets/Assets.png', 16, 16);
+    game.load.spritesheet("BordersV1", "assets/imgs/UI/Borders(8x8).png",8,8);
+    game.load.spritesheet("BordersV2", "assets/imgs/UI/Borders2(8x8).png",8,8);
+    
     game.load.image("bloque", "assets/imgs/bloque.png");
+
+    game.load.image("containerLifeBar", "assets/imgs/UI/containerLifeBar.png");
+    game.load.image("bigTextBlock", "assets/imgs/UI/BigTextBlock.png");
+    game.load.image("lifeBar", "assets/imgs/UI/lifeBar.png");
+    game.load.image("redBlock", "assets/imgs/UI/RedBlock.png");
+    game.load.image("textBlock", "assets/imgs/UI/TextBlock.png");
 }
 
 function createPlay(){
     //levelConfig = JSON.parse(game.cache.getText('level')); //Ni idea como va esto julio
     createPlayer();
+    createUI();
     createKeyControls();
     createBlock();
 
@@ -53,12 +67,17 @@ function updatePlay(){
 function createPlayer(){
     player = game.add.sprite(200,30,'player');
     game.physics.arcade.enable(player);
-    player.body.immovable =true;
+    player.body.immovable = true;
     game.camera.bounds = (800,600);
     game.camera.follow(player);
-    game.camera.deadzone = new Phaser.Rectangle(0, 100, 800, 67);
+    game.camera.deadzone = new Phaser.Rectangle(0, 100, 800, 80);
     //https://phaser.io/examples/v2/camera/deadzone
     
+}
+
+function createUI(){
+    containerLifeBar = game.add.sprite(10,10,'containerLifeBar');
+    lifeBar = game.add.sprite(12,12,'lifeBar');
 }
 
 
@@ -93,9 +112,8 @@ function setUpBlock(){
 
 
 function managePlayerVelocity(){
-    
-    player.body.velocity.y += playeracceleration; 
-    //playerVelocity += playeracceleration;
+    player.body.velocity.y += playerAcceleration;
+    //playerVelocity += playerAcceleration;
 }
 
 function playerHitsBlock(player, block){
