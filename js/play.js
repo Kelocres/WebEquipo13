@@ -29,13 +29,14 @@ let playState = {
 }
 
 function preloadPlay(){
-    game.load.spritesheet('player','assets/imgs/Slime/Slime 16x16.png', 16, 16);
+    
     game.load.spritesheet('enviroment','assets/imgs/Enviroment/Assets/Assets.png', 16, 16);
     game.load.spritesheet("BordersV1", "assets/imgs/UI/Borders(8x8).png",8,8);
     game.load.spritesheet("BordersV2", "assets/imgs/UI/Borders2(8x8).png",8,8);
     
     game.load.image("bloque", "assets/imgs/bloque.png");
 
+    game.load.image('player','assets/imgs/New Player/jump/alien_4-jump0.png');
     game.load.image("containerLifeBar", "assets/imgs/UI/containerLifeBar.png");
     game.load.image("bigTextBlock", "assets/imgs/UI/BigTextBlock.png");
     game.load.image("lifeBar", "assets/imgs/UI/lifeBar.png");
@@ -61,13 +62,15 @@ function updatePlay(){
     managePlayerVelocity();
     manageBlockMovement();
     backToMove();
-    game.physics.arcade.collide(player, blocks,playerHitsBlock,null,this);
+    game.physics.arcade.collide(player, blocks,playerHitsBlock,null,this);//.anchor para cambiar la animación
 }
 
 function createPlayer(){
-    player = game.add.sprite(200,30,'player');
+    player = game.add.sprite(200,0,'player');
     game.physics.arcade.enable(player);
     player.body.immovable = true;
+    player.scale.setTo(0.1,0.1);
+    player.y = -50;
     game.camera.bounds = (800,600);
     game.camera.follow(player);
     game.camera.deadzone = new Phaser.Rectangle(0, 100, 800, 80);
@@ -76,8 +79,19 @@ function createPlayer(){
 }
 
 function createUI(){
-    containerLifeBar = game.add.sprite(10,10,'containerLifeBar');
-    lifeBar = game.add.sprite(12,12,'lifeBar');
+    containerLifeBar = game.add.sprite(0,0,'containerLifeBar');
+    lifeBar = game.add.sprite(0,0,'lifeBar');
+
+    containerLifeBar.scale.setTo(4,4);
+    lifeBar.scale.setTo(4, 4);
+
+    containerLifeBar.x = 20;
+    containerLifeBar.y = 20;
+    lifeBar.x = 28;
+    lifeBar.y = 25;
+
+    containerLifeBar.fixedToCamera = true;
+    lifeBar.fixedToCamera = true;
 }
 
 
