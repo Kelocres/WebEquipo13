@@ -8,9 +8,11 @@ let startState =
 
 
 
-//Los botones
+//The buttons
 let btnPlay, btnAbout, btnInstrucions;
 
+//Begin in the first level (level1.json)
+let currentLevel = 1;
 
 function cargaAssets() 
 {

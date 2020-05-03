@@ -1,15 +1,18 @@
 
 const BOUNCE_CONSTANT = -100; // indice de rebote
-const NUM_BLOCKS = 7;
+//const NUM_BLOCKS = 7;
 const BLOCK_SPEED = 3; // velocidad a la que los bloque se mueven
 const initBlockX = 80;// width of the block
 const initBlockY = 450; //400 + half height of the block
 
 let haveToPutNoBlock = true;
-let blockX = -40;
-let blockPos = 1;
+let firstBlockX = -40;
+let blockX;
+let blockY;
 let blocks;
 let blockMovementDissabled = false;
+
+let worldMargin;
 
 let player;
 let playerLife;
@@ -21,6 +24,8 @@ let containerLifeBar;
 let lifeBar;
 
 let levelConfig;
+
+let levelsData = ['assets/levels/level1.json','assets/levels/level2.json'];
 
 let playState = {
     preload: preloadPlay,
@@ -36,16 +41,18 @@ function preloadPlay(){
     
     game.load.image("bloque", "assets/imgs/bloque.png");
 
-    game.load.image('player','assets/imgs/New Player/jump/alien_4-jump0.png');
+    game.load.image('player','assets/imgs/New Player/jump/alien_4-jump0Fixed.png');
     game.load.image("containerLifeBar", "assets/imgs/UI/containerLifeBar.png");
     game.load.image("bigTextBlock", "assets/imgs/UI/BigTextBlock.png");
     game.load.image("lifeBar", "assets/imgs/UI/lifeBar.png");
     game.load.image("redBlock", "assets/imgs/UI/RedBlock.png");
     game.load.image("textBlock", "assets/imgs/UI/TextBlock.png");
+
+    game.load.text("level",levelsData[currentLevel -1], true);
 }
 
 function createPlay(){
-    //levelConfig = JSON.parse(game.cache.getText('level')); //Ni idea como va esto julio
+    levelConfig = JSON.parse(game.cache.getText('level')); 
     createPlayer();
     createUI();
     createKeyControls();
@@ -66,7 +73,9 @@ function updatePlay(){
 }
 
 function createPlayer(){
-    player = game.add.sprite(200,0,'player');
+    let playerPosX = levelConfig.playerStart.x;
+    let playerPosY = levelConfig.playerStart.y;
+    player = game.add.sprite( playerPosX, playerPosY, 'player');
     game.physics.arcade.enable(player);
     player.body.immovable = true;
     player.scale.setTo(0.1,0.1);
@@ -96,14 +105,39 @@ function createUI(){
 
 
 function createBlock(){
+
+    //First of all, set up the number of blocks
+    let numPlatforms = levelConfig.platforms.length;
+    let blocksPerPlatform = levelConfig.blocksPerPlatform;
+    let numBlocks = numPlatforms * blocksPerPlatform;
+
+    //The margins of the world(negative->left, positive->right)
+    worldMargin = blocksPerPlatform * initBlockX/2 + initBlockX*3;
+
+    //The group of normal blocks
     blocks = game.add.group();
     blocks.enableBody = true;
     game.physics.arcade.enable(blocks);
-    blocks.createMultiple(NUM_BLOCKS, 'bloque');
-    blocks.forEach(setUpBlock, this);
+    blocks.createMultiple(numBlocks, 'bloque');
+    //blocks.forEach(setUpBlock, this);
+
+    blockY = 0;
+    let hole;
+
+    //For each platform
+    for(var i = 0; i< numPlatforms; i++)
+    {
+        blockY += levelConfig.platforms[i].distance;
+        hole = levelConfig.platforms[i].hole;
+        blockX = -worldMargin;
+
+        for(var j = 0; j < blocksPerPlatform; j++)
+            setUpBlock(j,hole);
+    }
+
 }
 
-function setUpBlock(){
+/*function setUpBlock(){
     let item = blocks.getFirstExists(false);
     if (item) {
         let rand = Math.random();
@@ -122,7 +156,32 @@ function setUpBlock(){
         blockPos++;
     }
         
+}*/
+
+function setUpBlock(currentBlock, hole)
+{
+    let item = blocks.getFirstExists(false); 
+    if(item)
+    {
+        //It's a hole!
+        if(currentBlock == hole)
+        {
+            delete(item);
+        }
+        //It's just another block
+        else
+        {
+            item.reset(blockX, blockY);
+            item.body.checkCollision.left = true;
+            item.body.checkCollision.up = true;
+            item.body.checkCollision.right = true;
+            item.body.immovable =true;
+        }
+        blockX+= initBlockX;
+    }
+
 }
+
 
 
 function managePlayerVelocity(){
@@ -146,7 +205,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             blocks.forEach(function(block){
                 block.body.x -= BLOCK_SPEED;
                 if(block.body.x < -initBlockX){
-                     block.body.x += 400 + 2*initBlockX; // += para ajustar su verdadera posicion en relacion con lo demas boques
+                     block.body.x += worldMargin + 2*initBlockX; // += para ajustar su verdadera posicion en relacion con lo demas boques
                 }
             });
         }
@@ -154,7 +213,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             blocks.forEach(function(block){
                 block.body.x += BLOCK_SPEED;
                 if(block.body.x > 400 + initBlockX){
-                    let aux = 400 + initBlockX - block.body.x;
+                    let aux = worldMargin + initBlockX - block.body.x;
                     block.body.x = -initBlockX - aux;
                 }
             });      
