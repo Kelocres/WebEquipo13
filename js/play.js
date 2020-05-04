@@ -39,8 +39,7 @@ function preloadPlay(){
     game.load.spritesheet("BordersV1", "assets/imgs/UI/Borders(8x8).png",8,8);
     game.load.spritesheet("BordersV2", "assets/imgs/UI/Borders2(8x8).png",8,8);
     
-    game.load.image("bloque", "assets/imgs/bloque.png");
-
+    game.load.spritesheet('bloque', 'assets/imgs/Enviroment/Assets/Assets.png', 15, 15, 23);
     game.load.image('player','assets/imgs/New Player/jump/alien_4-jump0Fixed.png');
     game.load.image("containerLifeBar", "assets/imgs/UI/containerLifeBar.png");
     game.load.image("bigTextBlock", "assets/imgs/UI/BigTextBlock.png");
@@ -118,8 +117,7 @@ function createBlock(){
     blocks = game.add.group();
     blocks.enableBody = true;
     game.physics.arcade.enable(blocks);
-    blocks.createMultiple(numBlocks, 'bloque');
-    //blocks.forEach(setUpBlock, this);
+    blocks.createMultiple(numBlocks, 'bloque', 3);
 
     blockY = 0;
     let hole;
@@ -129,34 +127,13 @@ function createBlock(){
     {
         blockY += levelConfig.platforms[i].distance;
         hole = levelConfig.platforms[i].hole;
-        blockX = -worldMargin;
+        blockX = firstBlockX;
 
         for(var j = 0; j < blocksPerPlatform; j++)
             setUpBlock(j,hole);
     }
 
 }
-
-/*function setUpBlock(){
-    let item = blocks.getFirstExists(false);
-    if (item) {
-        let rand = Math.random();
-        if(haveToPutNoBlock && rand<blockPos/NUM_BLOCKS){
-            delete(item);
-            haveToPutNoBlock = false;
-        }
-        else{
-            item.reset(blockX, 60);
-            item.body.checkCollision.left = true;
-            item.body.checkCollision.up = true;
-            item.body.checkCollision.right = true;
-            item.body.immovable =true;
-        }
-        blockX+= initBlockX;
-        blockPos++;
-    }
-        
-}*/
 
 function setUpBlock(currentBlock, hole)
 {
@@ -176,6 +153,7 @@ function setUpBlock(currentBlock, hole)
             item.body.checkCollision.up = true;
             item.body.checkCollision.right = true;
             item.body.immovable =true;
+            item.scale.setTo(5,5);
         }
         blockX+= initBlockX;
     }
