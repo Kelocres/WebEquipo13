@@ -16,6 +16,7 @@ let blockMovementDissabled = false;
 //TRAPS
 let traps;
 let trapAppearing; //Sirve para medir la proporcionalidad de que aparezcan trampas
+let trapShow;
 
 //POWER UPS
 let powerUps;
@@ -54,6 +55,8 @@ function preloadPlay(){
     //game.load.spritesheet('bloque', 'assets/imgs/New enviroment/spritesheet_tileset.png', 107, 107, 300);
     game.load.image('bloque', 'assets/imgs/New enviroment/Tile_5.png');
     game.load.image('spikes', 'assets/imgs/New enviroment/Tile_26.png');
+    game.load.image('spikesCollider', 'assets/imgs/New enviroment/Tile_26Collider.png');
+
     game.load.image('player','assets/imgs/New Player/jump/alien_4-jump0Fixed.png');
     game.load.image("containerLifeBar", "assets/imgs/UI/containerLifeBar.png");
     game.load.image("bigTextBlock", "assets/imgs/UI/BigTextBlock.png");
@@ -139,8 +142,14 @@ function createBlock(){
     traps = game.add.group();
     traps.enableBody = true;
     game.physics.arcade.enable(traps);
-    traps.createMultiple(numBlocks, 'spikes');
+    traps.createMultiple(numBlocks, 'spikesCollider');
     traps.callAll('anchor.setTo','anchor',0, 1.0);
+
+    trapShow = game.add.group();
+    trapShow.enableBody = true;
+    game.physics.arcade.enable(trapShow);
+    trapShow.createMultiple(numBlocks, 'spikes');
+    trapShow.callAll('anchor.setTo','anchor',0, 1.0);
 
     //The group of powerups
     powerUps = game.add.group();
@@ -227,6 +236,17 @@ function setUpBlock(currentBlock, hole)
                     itemTrap.body.immovable =true;
                     itemTrap.scale.setTo(0.3,0.3);
                 }
+
+                let imgTrap = trapShow.getFirstExists(false);
+                if(itemTrap)
+                {
+                    imgTrap.reset(blockX, blockY);
+                    imgTrap.body.checkCollision.left = true;
+                    imgTrap.body.checkCollision.up = true;
+                    imgTrap.body.checkCollision.right = true;
+                    imgTrap.body.immovable =true;
+                    imgTrap.scale.setTo(0.3,0.3);
+                }
             }
         }
         blockX+= initBlockX;
@@ -278,12 +298,14 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
         if(cursorRigh.isDown){
             blocks.forEach(movementCursorRight, this);
             traps.forEach(movementCursorRight, this);
+            trapShow.forEach(movementCursorRight, this);
             powerUps.forEach(movementCursorRight, this);
             endBlocks.forEach(movementCursorRight, this);
         }
         if(cursorLeft.isDown){
             blocks.forEach(movementCursorLeft, this);
             traps.forEach(movementCursorLeft, this);
+            trapShow.forEach(movementCursorLeft, this);
             powerUps.forEach(movementCursorLeft, this);
             endBlocks.forEach(movementCursorLeft, this);      
         }
