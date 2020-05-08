@@ -51,7 +51,9 @@ function preloadPlay(){
     game.load.spritesheet("BordersV1", "assets/imgs/UI/Borders(8x8).png",8,8);
     game.load.spritesheet("BordersV2", "assets/imgs/UI/Borders2(8x8).png",8,8);
     
-    game.load.spritesheet('bloque', 'assets/imgs/Enviroment/Assets/Assets.png', 16, 16, 300);
+    //game.load.spritesheet('bloque', 'assets/imgs/New enviroment/spritesheet_tileset.png', 107, 107, 300);
+    game.load.image('bloque', 'assets/imgs/New enviroment/Tile_5.png');
+    game.load.image('spikes', 'assets/imgs/New enviroment/Tile_26.png');
     game.load.image('player','assets/imgs/New Player/jump/alien_4-jump0Fixed.png');
     game.load.image("containerLifeBar", "assets/imgs/UI/containerLifeBar.png");
     game.load.image("bigTextBlock", "assets/imgs/UI/BigTextBlock.png");
@@ -59,7 +61,7 @@ function preloadPlay(){
     game.load.image("redBlock", "assets/imgs/UI/RedBlock.png");
     game.load.image("textBlock", "assets/imgs/UI/TextBlock.png");
 
-    game.load.image("cristal","assets/imgs/New Environment/Tile_35.png");
+    game.load.image("cristal","assets/imgs/New enviroment/Tile_35.png");
 
     game.load.text("level",levelsData[currentLevel -1], true);
 }
@@ -131,13 +133,13 @@ function createBlock(){
     blocks = game.add.group();
     blocks.enableBody = true;
     game.physics.arcade.enable(blocks);
-    blocks.createMultiple(numBlocks, 'bloque', 3);
+    blocks.createMultiple(numBlocks, 'bloque');
 
     //The group of traps that harm the player
     traps = game.add.group();
     traps.enableBody = true;
     game.physics.arcade.enable(traps);
-    traps.createMultiple(numBlocks, 'bloque', 143);
+    traps.createMultiple(numBlocks, 'spikes');
     traps.callAll('anchor.setTo','anchor',0, 1.0);
 
     //The group of powerups
@@ -150,7 +152,7 @@ function createBlock(){
     endBlocks = game.add.group();
     endBlocks.enableBody = true;
     game.physics.arcade.enable(endBlocks);
-    endBlocks.createMultiple(blocksPerPlatform, 'bloque', 0);
+    endBlocks.createMultiple(blocksPerPlatform, 'bloque');
 
     blockY = 0;
     let hole;
@@ -210,7 +212,7 @@ function setUpBlock(currentBlock, hole)
             item.body.checkCollision.up = true;
             item.body.checkCollision.right = true;
             item.body.immovable =true;
-            item.scale.setTo(5,5);
+            item.scale.setTo(0.3, 0.3);
 
             // Will a trap appear here??
             if(Math.floor(Math.random()* 100) <= trapAppearing)
@@ -223,7 +225,7 @@ function setUpBlock(currentBlock, hole)
                     itemTrap.body.checkCollision.up = true;
                     itemTrap.body.checkCollision.right = true;
                     itemTrap.body.immovable =true;
-                    itemTrap.scale.setTo(5,5);
+                    itemTrap.scale.setTo(0.3,0.3);
                 }
             }
         }
@@ -242,7 +244,7 @@ function setUpEndBlock()
         item.body.checkCollision.up = true;
         item.body.checkCollision.right = true;
         item.body.immovable =true;
-        item.scale.setTo(5,5);
+        item.scale.setTo(0.3,0.3);
     }
 
     blockX+= initBlockX;
