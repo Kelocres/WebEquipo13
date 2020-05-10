@@ -52,17 +52,22 @@ function preloadPlay(){
     game.load.spritesheet("BordersV1", "assets/imgs/UI/Borders(8x8).png",8,8);
     game.load.spritesheet("BordersV2", "assets/imgs/UI/Borders2(8x8).png",8,8);
     
+    //Enviroment
     //game.load.spritesheet('bloque', 'assets/imgs/New enviroment/spritesheet_tileset.png', 107, 107, 300);
     game.load.image('bloque', 'assets/imgs/New enviroment/Tile_5.png');
     game.load.image('spikes', 'assets/imgs/New enviroment/Tile_26.png');
     game.load.image('spikesCollider', 'assets/imgs/New enviroment/Tile_26Collider.png');
 
+    //Player
     game.load.image('player','assets/imgs/New Player/jump/alien_4-jump0Fixed.png');
-    game.load.image("containerLifeBar", "assets/imgs/UI/containerLifeBar.png");
-    game.load.image("bigTextBlock", "assets/imgs/UI/BigTextBlock.png");
-    game.load.image("lifeBar", "assets/imgs/UI/lifeBar.png");
-    game.load.image("redBlock", "assets/imgs/UI/RedBlock.png");
-    game.load.image("textBlock", "assets/imgs/UI/TextBlock.png");
+
+    //UI
+    game.load.image("containerLifeBar", "assets/imgs/New UI/PNG/Main_UI/Health_Bar_Table.png");
+    //game.load.image("bigTextBlock", "assets/imgs/UI/BigTextBlock.png");
+    game.load.image("lifeBar", "assets/imgs/New UI/PNG/Main_UI/Boss_HP_Bar_2.png");
+    //game.load.image("redBlock", "assets/imgs/UI/RedBlock.png");
+    //game.load.image("textBlock", "assets/imgs/UI/TextBlock.png");
+    game.load.image("playerNameSpace", "assets/imgs/New UI/PNG/Main_UI/Boss_Name_Table.png");
 
     game.load.image("cristal","assets/imgs/New enviroment/Tile_35.png");
 
@@ -76,7 +81,6 @@ function createPlay(){
     createBlock();
 
     game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
-
 
     game.physics.startSystem(Phaser.Physics.ARCADE);
     createUI();
@@ -108,17 +112,22 @@ function createPlayer(){
 function createUI(){
     containerLifeBar = game.add.sprite(0,0,'containerLifeBar');
     lifeBar = game.add.sprite(0,0,'lifeBar');
+    playerNameSpace = game.add.sprite(0,0,'playerNameSpace');
 
-    containerLifeBar.scale.setTo(4,4);
-    lifeBar.scale.setTo(4, 4);
+    containerLifeBar.scale.setTo(0.4,0.4);
+    lifeBar.scale.setTo(0.148, 1.2);
+    playerNameSpace.scale.setTo(0.45,0.45);
 
-    containerLifeBar.x = 20;
-    containerLifeBar.y = 20;
-    lifeBar.x = 28;
-    lifeBar.y = 25;
+    containerLifeBar.x = 0;
+    containerLifeBar.y = 0;
+    lifeBar.x = 2;
+    lifeBar.y = 2;
+    playerNameSpace.x = 0;
+    playerNameSpace.y = 28;
 
     containerLifeBar.fixedToCamera = true;
     lifeBar.fixedToCamera = true;
+    playerNameSpace.fixedToCamera = true;
 }
 
 
