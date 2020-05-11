@@ -1,9 +1,12 @@
 
-const BOUNCE_CONSTANT = -100; // indice de rebote
+const BOUNCE_CONSTANT = -150; // indice de rebote
 //const NUM_BLOCKS = 7;
 const BLOCK_SPEED = 3; // velocidad a la que los bloque se mueven
 const initBlockX = 80;// width of the block
 const initBlockY = 450; //400 + half height of the block
+
+//Velocidad a la que el jugador rompe un bloque
+const VELOCITY_BREAKS_BLOCK = 500;
 
 // BLOCKS
 let haveToPutNoBlock = true;
@@ -30,8 +33,10 @@ let worldMargin;
 let player;
 let playerLife;
 //let playerVelocity = 4;
-let playerAcceleration = 1;
+let playerAcceleration = 2;
 let playerName ="randomSlime";
+
+let velocidadTope;
 
 let containerLifeBar;
 let lifeBar;
@@ -39,6 +44,33 @@ let lifeBar;
 let levelConfig;
 
 let levelsData = ['assets/levels/level1.json','assets/levels/level2.json'];
+
+class LetterBlock {
+
+    constructor(sprite, assignedLetter)
+    {
+        this.sprite = sprite;
+        this.assignedLetter = assignedLetter;
+        this.solid = true; //Mientras sea true, el jugador colisiona con él
+    }
+
+    verifyLetter(letter)
+    {
+        this.solid = false;
+
+        if(letter == this.assignedLetter)
+        {
+            let disappear = game.add.tween(this.sprite).to({
+                scale: 2, alpha: 0 //Se agranda al mismo tiempo que desaparece
+            }, 500, // Duración: medio segundo
+            Phaser.Easing.Linear.None, true, 0, 0, false);
+
+            disappear.onComplete.add(function(){
+                this.sprite.kill();
+            })
+        }
+    }
+}
 
 let playState = {
     preload: preloadPlay,
@@ -69,7 +101,7 @@ function preloadPlay(){
     //game.load.image("textBlock", "assets/imgs/UI/TextBlock.png");
     game.load.image("playerNameSpace", "assets/imgs/New UI/PNG/Main_UI/Boss_Name_Table.png");
 
-    game.load.image("cristal","assets/imgs/New enviroment/Tile_35.png");
+    game.load.image("cristal","assets/imgs/New enviroment/Tile_37ParaJuego.png");
 
     game.load.text("level",levelsData[currentLevel -1], true);
 }
@@ -84,6 +116,8 @@ function createPlay(){
 
     game.physics.startSystem(Phaser.Physics.ARCADE);
     createUI();
+
+    velocidadTope = 0;
 }
 
 function updatePlay(){
@@ -92,6 +126,12 @@ function updatePlay(){
     backToMove();
     game.physics.arcade.collide(player, blocks,playerHitsBlock,null,this);//.anchor para cambiar la animación
     game.physics.arcade.collide(player, traps, playerHitsTrap, null, this);
+
+    if(player.body.velocity.y >= velocidadTope)
+    {
+        velocidadTope = player.body.velocity.y;
+        //console.log(velocidadTope);
+    }
 }
 
 function createPlayer(){
@@ -183,7 +223,7 @@ function createBlock(){
         blockY += levelConfig.platforms[i].distance;
         hole = levelConfig.platforms[i].hole;
         blockX = firstBlockX;
-        trapAppearing += 5;
+        trapAppearing += 3;
 
         if(i!=numPlatforms-1)
             for(var j = 0; j < blocksPerPlatform; j++)
@@ -214,7 +254,7 @@ function setUpBlock(currentBlock, hole)
                 let itemPower = powerUps.getFirstExists(false);
                 if(itemPower)
                 {
-                    itemPower.reset(blockX, blockY);
+                    itemPower.reset(blockX+17, blockY);
                     itemPower.body.checkCollision.left = true;
                     itemPower.body.checkCollision.up = true;
                     itemPower.body.checkCollision.right = true;
@@ -287,6 +327,10 @@ function managePlayerVelocity(){
 function playerHitsBlock(player, block){
     //Que tanto en personaje como los bloques tengan colliders muy finos podrian solucionar el problema de que rebote si da en un lado del bloque
     if(block.body.touching.up == true){
+        //Si va más rápido que cierto valor, el bloque se rompe
+        if(player.body.velocity.y >= VELOCITY_BREAKS_BLOCK)
+            block.kill();
+
         player.body.velocity.y =BOUNCE_CONSTANT;
     }
     else if(block.body.touching.down == true)
