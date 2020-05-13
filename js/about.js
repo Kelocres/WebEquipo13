@@ -8,10 +8,12 @@ let btnBack;
 
 function loadAboutAssets() {
     game.load.image('botonback', 'assets/imgs/back.png');
+    game.load.image("background", "assets/imgs/New enviroment/BackGrounds/BG space 2.jpg")
 }
 
 function showInstructions() {
-    game.add.image(0, 0, 'bg');
+    background = game.add.image(0,0,'background');
+    background.scale.setTo(0.6,0.6);
 
     let textTitle = 'GAME ABOUT FALLING';
     let styleTitle = {

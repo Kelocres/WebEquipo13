@@ -1,6 +1,7 @@
 {
     "playerStart" : {"x": 200, "y": 30},
     "blocksPerPlatform": 10,
+    "backgroundName": "BG_space_5",
     "platforms":    
     [
         {"distance": 200, "isThereLetter": "false", "hole":2},

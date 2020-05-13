@@ -30,14 +30,31 @@ let endBlocks;
 
 let worldMargin;
 
+//Player
 let player;
 let playerLife;
 //let playerVelocity = 4;
 let playerAcceleration = 2;
-let playerName ="randomSlime";
+let playerName ="randomMonster";
+let playerSprite
+let playerScale = 0.14;
+const spriteDistance = 130;
+let playerFlexAnimation;
+let playerJumpAnimation;
+let playerFallAnimation;
+let playerJumpling;
+
+//Background
+let background;
+const backgroundMoveFactor = 0.4;
+const backgroundMoveFactorX = 1;
+const backgroundMoveFactorY = 0.895;
+const backgoundBaseX = -800;
+const backgoundBaseY = -200;
 
 let velocidadTope;
 
+//UI
 let containerLifeBar;
 let lifeBar;
 
@@ -90,8 +107,14 @@ function preloadPlay(){
     game.load.image('spikes', 'assets/imgs/New enviroment/Tile_26.png');
     game.load.image('spikesCollider', 'assets/imgs/New enviroment/Tile_26Collider.png');
 
+    //BackGrounds
+    game.load.image('BG_alien_3','assets/imgs/New enviroment/BackGrounds/BG alien 3.jpg');
+    game.load.image('BG_space_5','assets/imgs/New enviroment/BackGrounds/BG space 5.jpg');
+
     //Player
-    game.load.image('player','assets/imgs/New Player/jump/alien_4-jump0Fixed.png');
+    //game.load.image('player','assets/imgs/New Player/jump/alien_4-jump0Fixed.png');
+    game.load.spritesheet('playerSprite','assets/imgs/New Player/jump/player_jump_spritesheet_good.png',441,474,14);
+    game.load.image('playerBox','assets/imgs/New Player/jump/playerBox.png');
 
     //UI
     game.load.image("containerLifeBar", "assets/imgs/New UI/PNG/Main_UI/Health_Bar_Table.png");
@@ -109,8 +132,11 @@ function preloadPlay(){
 function createPlay(){
     levelConfig = JSON.parse(game.cache.getText('level')); 
     createPlayer();
+    createCameraBounds();
     createKeyControls();
     createBlock();
+    createAnimations();
+    createBackground();
 
     game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
 
@@ -118,6 +144,7 @@ function createPlay(){
     createUI();
 
     velocidadTope = 0;
+    playerSprite.bringToTop();//Puede que tenga más sentido que no esté así
 }
 
 function updatePlay(){
@@ -132,16 +159,27 @@ function updatePlay(){
         velocidadTope = player.body.velocity.y;
         //console.log(velocidadTope);
     }
+    spriteUpdate();
+    animationsUpdate();
+
+    //if (background.y< 1536 && background.y>= backgoundBaseY-10) 
+    background.y = backgoundBaseY + game.camera.y * backgroundMoveFactorY;
 }
 
 function createPlayer(){
     let playerPosX = levelConfig.playerStart.x;
     let playerPosY = levelConfig.playerStart.y;
-    player = game.add.sprite( playerPosX, playerPosY, 'player');
+    player = game.add.sprite( playerPosX, playerPosY, 'playerBox');
     game.physics.arcade.enable(player);
     player.body.immovable = true;
-    player.scale.setTo(0.1,0.1);
-    player.y = -50;
+    player.scale.setTo(playerScale-0.005,playerScale);
+    playerSprite = game.add.sprite( playerPosX - spriteDistance*playerScale-8, playerPosY+10, 'playerSprite');
+    playerSprite.scale.setTo(playerScale,playerScale);
+    playerSprite.frame = 10;
+    playerJumpling = false;
+}
+
+function createCameraBounds(){
     game.camera.bounds = (800,600);
     game.camera.follow(player);
     game.camera.deadzone = new Phaser.Rectangle(0, 100, 800, 80);
@@ -238,6 +276,17 @@ function createBlock(){
 
 }
 
+function createAnimations(){
+    playerFlexAnimation = playerSprite.animations.add("flex",[11,12,13,0,1,2,3,4],20,false);
+    playerJumpAnimation = playerSprite.animations.add("jump",[5,6,7,8],8,false);
+    playerFallAnimation = playerSprite.animations.add("fall",[9,10],6,false);
+}
+
+function createBackground(){
+    background = game.add.sprite(backgoundBaseX,backgoundBaseY,levelConfig.backgroundName);
+    background.sendToBack();
+}
+
 function setUpBlock(currentBlock, hole)
 {
     let item = blocks.getFirstExists(false); 
@@ -332,6 +381,9 @@ function playerHitsBlock(player, block){
             block.kill();
 
         player.body.velocity.y =BOUNCE_CONSTANT;
+        //Meter anim aquí
+        playerJumpAnimation.play('flex');
+        playerJumpling = true;
     }
     else if(block.body.touching.down == true)
         player.body.velocity.y = - player.body.velocity.y 
@@ -346,6 +398,23 @@ function playerHitsTrap(player, trap)
     console.log("Tocas una trampa");
 }
 
+function spriteUpdate(){
+    playerSprite.x = player.x - spriteDistance*playerScale-8;
+    playerSprite.y = player.y +10;
+}
+
+function animationsUpdate(){
+    if(playerJumpling){
+        if(playerFlexAnimation.isFinished){
+            playerJumpAnimation.play();
+        }
+        else if(playerJumpAnimation.isFinished){
+            playerFallAnimation.play();
+            playerJumpling = false;
+        }
+    }
+}
+
 function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, hacer que no se puedan movel los bloques
     if(!blockMovementDissabled){
         if(cursorRigh.isDown){
@@ -354,13 +423,17 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             trapShow.forEach(movementCursorRight, this);
             powerUps.forEach(movementCursorRight, this);
             endBlocks.forEach(movementCursorRight, this);
+            //playerSprite.scale.setTo(-playerScale,playerScale);
+            if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX;
         }
         if(cursorLeft.isDown){
             blocks.forEach(movementCursorLeft, this);
             traps.forEach(movementCursorLeft, this);
             trapShow.forEach(movementCursorLeft, this);
             powerUps.forEach(movementCursorLeft, this);
-            endBlocks.forEach(movementCursorLeft, this);      
+            endBlocks.forEach(movementCursorLeft, this);
+            //playerSprite.scale.setTo(playerScale,playerScale);
+            if(background.x<(-background.x))background.x += backgroundMoveFactorX;
         }
     }  
 }
