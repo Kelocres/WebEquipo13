@@ -57,6 +57,7 @@ let velocidadTope;
 //UI
 let containerLifeBar;
 let lifeBar;
+let showName;
 
 let levelConfig;
 
@@ -203,9 +204,15 @@ function createUI(){
     playerNameSpace.x = 0;
     playerNameSpace.y = 28;
 
+    var styleShowName = { font: "24px Arial", fill: "#ffffff", align: "center" };
+    showName = game.add.text(200, 10, nombreJugador, styleShowName);
+
     containerLifeBar.fixedToCamera = true;
     lifeBar.fixedToCamera = true;
     playerNameSpace.fixedToCamera = true;
+    showName.fixedToCamera = true;
+
+    
 }
 
 

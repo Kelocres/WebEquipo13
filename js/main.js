@@ -8,6 +8,7 @@ window.onload = startGame;
 
 function startGame() {
     game.state.add('start', startState);
+    game.state.add('writeName', writeNameState);
     game.state.add('play', playState);
     game.state.add('about', aboutState);
     game.state.add('endgame', endState);

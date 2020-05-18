@@ -36,5 +36,5 @@ function muestraPantalla()
 
 // MÉTODOS DE LOS BOTONES --------------------------
 function aboutPressed()     {game.state.start('about');}
-function playPressed()      {game.state.start('play');}
+function playPressed()      {game.state.start('writeName');}
 function instPressed()      {game.state.start('instrucions');}
