@@ -4,6 +4,8 @@ let btnGoToPlay;
 
 //Mapa de bits donde se escribirá
 var bmd;
+let key_backspace;
+let key_intro
 
 //Variable string
 var nombreJugador;
@@ -11,7 +13,6 @@ var nombreJugador;
 let writeNameState = {
     preload: preloadWN,
     create: createWN
-    //update: updateWN
 }
 
 function preloadWN()
@@ -44,30 +45,50 @@ function createWN()
 
     nombreJugador = "";
 
+    key_backspace = game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
+    key_backspace.onDown.add(borrarLetra, this);
+
+    key_intro = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+    key_intro.onDown.add(startPlay, this);
+
     //  Capture all key presses
     game.input.keyboard.addCallbacks(this, null, null, keyPress);
 
     //startPlay();
 }
 
+
+function borrarLetra()
+{
+    //console.log("Borrar");
+    nombreJugador = nombreJugador.substring(0,nombreJugador.length-1);
+    changeName();
+}
+    
+
 function keyPress(char)
 {
     nombreJugador = nombreJugador + char;
     //nombreJugador = nombreJugador + String.fromCharCode(char);
 
-    //Mostrar palabra
-    bmd.cls();
-    var x = 64;
+    changeName();
+}
 
-    for(var i = 0; i < nombreJugador.length; i++)
-    {
-        var letra = nombreJugador.charAt(i);
-        bmd.context.fillText(letra, x, 300);
-
-        x += bmd.context.measureText(letra).width;
-
-
-    }
+function changeName()
+{
+        //Mostrar palabra
+        bmd.cls();
+        var x = 64;
+    
+        for(var i = 0; i < nombreJugador.length; i++)
+        {
+            var letra = nombreJugador.charAt(i);
+            bmd.context.fillText(letra, x, 300);
+    
+            x += bmd.context.measureText(letra).width;
+    
+    
+        }
 }
 
 function startPlay()
