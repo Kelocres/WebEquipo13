@@ -16,6 +16,12 @@ let blockY;
 let blocks;
 let blockMovementDissabled = false;
 
+//LETTER BLOCKS
+let groupLetterBlocks = [];
+let letterArray = [['a','A'],['e','E'],['i','I']];
+let allowLetterBlocks; //Se permiten o no bloques de letras en este nivel
+let letterBlockInPlatform; //En esta plataforma, en vez de hueco, hay letterBlock
+
 //TRAPS
 let traps;
 let trapAppearing; //Sirve para medir la proporcionalidad de que aparezcan trampas
@@ -58,6 +64,7 @@ let velocidadTope;
 let containerLifeBar;
 let lifeBar;
 let showName;
+let styleShowName = { font: "24px Arial", fill: "#ffffff", align: "center" };
 
 let levelConfig;
 
@@ -88,6 +95,18 @@ class LetterBlock {
             })
         }
     }
+
+    movementRight()
+    {
+
+    }
+
+    movementLeft()
+    {
+        
+    }
+
+
 }
 
 let playState = {
@@ -107,6 +126,7 @@ function preloadPlay(){
     game.load.image('bloque', 'assets/imgs/New enviroment/Tile_5.png');
     game.load.image('spikes', 'assets/imgs/New enviroment/Tile_26.png');
     game.load.image('spikesCollider', 'assets/imgs/New enviroment/Tile_26Collider.png');
+    game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_28.png');
 
     //BackGrounds
     game.load.image('BG_alien_3','assets/imgs/New enviroment/BackGrounds/BG alien 3.jpg');
@@ -204,7 +224,7 @@ function createUI(){
     playerNameSpace.x = 0;
     playerNameSpace.y = 28;
 
-    var styleShowName = { font: "24px Arial", fill: "#ffffff", align: "center" };
+    
     showName = game.add.text(200, 10, nombreJugador, styleShowName);
 
     containerLifeBar.fixedToCamera = true;
@@ -257,6 +277,10 @@ function createBlock(){
     game.physics.arcade.enable(endBlocks);
     endBlocks.createMultiple(blocksPerPlatform, 'bloque');
 
+    //The letterBlocks from level 2
+    groupLetterBlocks = [];
+    allowLetterBlocks = levelConfig.letterBlocks;
+
     blockY = 0;
     let hole;
     trapAppearing = 15;
@@ -269,6 +293,7 @@ function createBlock(){
         hole = levelConfig.platforms[i].hole;
         blockX = firstBlockX;
         trapAppearing += 3;
+        letterBlockInPlatform = levelConfig.platforms[i].isThereLetter;
 
         if(i!=numPlatforms-1)
             for(var j = 0; j < blocksPerPlatform; j++)
@@ -304,8 +329,28 @@ function setUpBlock(currentBlock, hole)
         {
             delete(item);
 
+            if(allowLetterBlocks==true && letterBlockInPlatform==true)
+            {
+                let thisLetterBlock = game.add.sprite(blockX, blockY, 'bloqueLetra');
+                thisLetterBlock.scale.setTo(0.3, 0.3);
+                game.physics.arcade.enable(thisLetterBlock);
+                thisLetterBlock.body.immovable = true;
+                thisLetterBlock.body.checkCollision.up = true;
+
+                //Assigned letter
+                let letterForBlock = letterArray[Math.random()* letterArray.length-1[1]];
+                console.log(letterForBlock);
+                let letterText = game.add.text(blockX, blockY, letterForBlock, styleShowName);
+
+                //Create object and push it to the array
+                let newLetterBlock = new LetterBlock(thisLetterBlock, letterForBlock);
+                groupLetterBlocks.push(newLetterBlock);
+
+            }
+
+
             //Will a power up appear here?
-            if(Math.floor(Math.random()* 100) <= powerUpsAppearing)
+            else if(Math.floor(Math.random()* 100) <= powerUpsAppearing)
             {
                 let itemPower = powerUps.getFirstExists(false);
                 if(itemPower)
@@ -318,6 +363,8 @@ function setUpBlock(currentBlock, hole)
                 }
             }
         }
+
+
         //It's just another block
         else
         {
@@ -430,6 +477,8 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             trapShow.forEach(movementCursorRight, this);
             powerUps.forEach(movementCursorRight, this);
             endBlocks.forEach(movementCursorRight, this);
+            for(let i=0; i<groupLetterBlocks.length; i++)
+                groupLetterBlocks[i].movementRight();
             //playerSprite.scale.setTo(-playerScale,playerScale);
             if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX;
         }
@@ -439,6 +488,8 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             trapShow.forEach(movementCursorLeft, this);
             powerUps.forEach(movementCursorLeft, this);
             endBlocks.forEach(movementCursorLeft, this);
+            for(let i=0; i<groupLetterBlocks.length; i++)
+                groupLetterBlocks[i].movementLeft();
             //playerSprite.scale.setTo(playerScale,playerScale);
             if(background.x<(-background.x))background.x += backgroundMoveFactorX;
         }
