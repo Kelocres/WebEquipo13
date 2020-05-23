@@ -18,7 +18,9 @@ let blockMovementDissabled = false;
 
 //LETTER BLOCKS
 let groupLetterBlocks = [];
-let letterArray = [['a','A'],['e','E'],['i','I']];
+//let letterArray = [['a','A'],['e','E'],['i','I']];
+let letterArray = ['a','e','i','o','u'];
+
 let allowLetterBlocks; //Se permiten o no bloques de letras en este nivel
 let letterBlockInPlatform; //En esta plataforma, en vez de hueco, hay letterBlock
 
@@ -71,39 +73,63 @@ let levelConfig;
 let levelsData = ['assets/levels/level1.json','assets/levels/level2.json'];
 
 class LetterBlock {
+    
 
     constructor(sprite, assignedLetter)
     {
         this.sprite = sprite;
         this.assignedLetter = assignedLetter;
         this.solid = true; //Mientras sea true, el jugador colisiona con él
+    
+        this.disappearBlock = game.add.tween(this.sprite).to({
+            alpha: 0 //Se agranda al mismo tiempo que desaparece
+        }, 500, // Duración: medio segundo
+        Phaser.Easing.Linear.None, false, 0, 0, false);
+
+        this.disappearLetter = game.add.tween(this.assignedLetter).to({
+            alpha: 0 //Se agranda al mismo tiempo que desaparece
+        }, 1000, // Duración: medio segundo
+        Phaser.Easing.Linear.None, false, 0, 0, false);
     }
 
     verifyLetter(letter)
     {
-        this.solid = false;
+        console.log("Comprobar "+this.assignedLetter.text+" con "+letter);
 
-        if(letter == this.assignedLetter)
+        if(letter == this.assignedLetter.text)
         {
-            let disappear = game.add.tween(this.sprite).to({
-                scale: 2, alpha: 0 //Se agranda al mismo tiempo que desaparece
-            }, 500, // Duración: medio segundo
-            Phaser.Easing.Linear.None, true, 0, 0, false);
+            this.solid = false;
 
-            disappear.onComplete.add(function(){
+            this.disappearBlock.start();
+            this.disappearLetter.start();
+
+            /*disappear.onComplete.add(function(){
                 this.sprite.kill();
-            })
+            })*/
         }
     }
 
     movementRight()
     {
-
+        this.sprite.body.x -= BLOCK_SPEED;
+        this.assignedLetter.body.x -= BLOCK_SPEED;
+        if(this.sprite.body.x < -initBlockX)
+        {
+            this.sprite.body.x += worldMargin + 2*initBlockX; // += para ajustar su verdadera posicion en relacion con lo demas boques
+            this.assignedLetter.body.x += worldMargin + 2*initBlockX;
+        }
     }
 
     movementLeft()
     {
-        
+        this.sprite.body.x += BLOCK_SPEED;
+        this.assignedLetter.body.x += BLOCK_SPEED;
+        if(this.sprite.body.x > 400 + initBlockX)
+        {
+            let aux = worldMargin + initBlockX - this.sprite.body.x;
+            this.sprite.body.x = -initBlockX - aux;
+            this.assignedLetter.body.x = -initBlockX - aux;
+        }
     }
 
 
@@ -148,6 +174,8 @@ function preloadPlay(){
     game.load.image("cristal","assets/imgs/New enviroment/Tile_37ParaJuego.png");
 
     game.load.text("level",levelsData[currentLevel -1], true);
+    
+
 }
 
 function createPlay(){
@@ -166,6 +194,11 @@ function createPlay(){
 
     velocidadTope = 0;
     playerSprite.bringToTop();//Puede que tenga más sentido que no esté así
+
+    //Para capturar los valores de las teclas del teclado, cuando haya LetterBlocks
+    if(levelConfig.allowLetterBlocks == true)
+        game.input.keyboard.addCallbacks(this, null, null, keyPress);
+
 }
 
 function updatePlay(){
@@ -175,16 +208,18 @@ function updatePlay(){
     game.physics.arcade.collide(player, blocks,playerHitsBlock,null,this);//.anchor para cambiar la animación
     game.physics.arcade.collide(player, traps, playerHitsTrap, null, this);
 
-    if(player.body.velocity.y >= velocidadTope)
-    {
-        velocidadTope = player.body.velocity.y;
-        //console.log(velocidadTope);
-    }
+    for(let i=0; i<groupLetterBlocks.length; i++)
+        if(groupLetterBlocks[i].solid == true)
+            game.physics.arcade.collide(player, groupLetterBlocks[i].sprite, playerHitsLB, null, this);
+        
+    
     spriteUpdate();
     animationsUpdate();
 
     //if (background.y< 1536 && background.y>= backgoundBaseY-10) 
     background.y = backgoundBaseY + game.camera.y * backgroundMoveFactorY;
+
+    
 }
 
 function createPlayer(){
@@ -280,6 +315,8 @@ function createBlock(){
     //The letterBlocks from level 2
     groupLetterBlocks = [];
     allowLetterBlocks = levelConfig.letterBlocks;
+    //allowLetterBlocks = true; 
+    //console.log("allowLetterBlocks "+allowLetterBlocks);
 
     blockY = 0;
     let hole;
@@ -294,6 +331,7 @@ function createBlock(){
         blockX = firstBlockX;
         trapAppearing += 3;
         letterBlockInPlatform = levelConfig.platforms[i].isThereLetter;
+        //console.log("letterBlockInPlatform "+ letterBlockInPlatform);
 
         if(i!=numPlatforms-1)
             for(var j = 0; j < blocksPerPlatform; j++)
@@ -328,9 +366,11 @@ function setUpBlock(currentBlock, hole)
         if(currentBlock == hole)
         {
             delete(item);
-
+            //console.log("allowLetterBlocks "+levelConfig.letterBlocks);
+            //console.log(levelConfig.letterBlocks==true);
             if(allowLetterBlocks==true && letterBlockInPlatform==true)
             {
+                console.log("Creating LB");
                 let thisLetterBlock = game.add.sprite(blockX, blockY, 'bloqueLetra');
                 thisLetterBlock.scale.setTo(0.3, 0.3);
                 game.physics.arcade.enable(thisLetterBlock);
@@ -338,12 +378,17 @@ function setUpBlock(currentBlock, hole)
                 thisLetterBlock.body.checkCollision.up = true;
 
                 //Assigned letter
-                let letterForBlock = letterArray[Math.random()* letterArray.length-1[1]];
+                //let letterForBlock = letterArray[Math.floor(Math.random()* letterArray.length)][1];
+                let letterForBlock = letterArray[Math.floor(Math.random()* letterArray.length)];
+
                 console.log(letterForBlock);
-                let letterText = game.add.text(blockX, blockY, letterForBlock, styleShowName);
+                let letterText = game.add.text(blockX+40, blockY+40, letterForBlock, styleShowName);
+                game.physics.arcade.enable(letterText);
+                letterText.fontSize = 48;
+                letterText.anchor.setTo(0.5, 0.5);
 
                 //Create object and push it to the array
-                let newLetterBlock = new LetterBlock(thisLetterBlock, letterForBlock);
+                let newLetterBlock = new LetterBlock(thisLetterBlock, letterText);
                 groupLetterBlocks.push(newLetterBlock);
 
             }
@@ -422,6 +467,18 @@ function setUpEndBlock()
     blockX+= initBlockX;
 }
 
+//Se pulsa una tecla del teclado
+//Se comprueban los LetterBlocks cercanos
+function keyPress(char)
+{
+    for(let i=0; i<groupLetterBlocks.length; i++)
+    {   let posInScreen = groupLetterBlocks[i].sprite.body.y-game.camera.y;
+        if(posInScreen>0 && posInScreen<game.camera.height)
+            groupLetterBlocks[i].verifyLetter(char);
+        
+    }
+}
+
 function managePlayerVelocity(){
     player.body.velocity.y += playerAcceleration;
     //playerVelocity += playerAcceleration;
@@ -440,6 +497,24 @@ function playerHitsBlock(player, block){
         playerJumpling = true;
     }
     else if(block.body.touching.down == true)
+        player.body.velocity.y = - player.body.velocity.y 
+    else{
+        blockMovementDissabled = true;
+    }
+}
+
+function playerHitsLB(player, letterBlock)
+{
+    
+    if(letterBlock.body.touching.up == true)
+    {
+        
+        player.body.velocity.y =BOUNCE_CONSTANT;
+        //Meter anim aquí
+        playerJumpAnimation.play('flex');
+        playerJumpling = true;
+    }
+    else if(letterBlock.body.touching.down == true)
         player.body.velocity.y = - player.body.velocity.y 
     else{
         blockMovementDissabled = true;
