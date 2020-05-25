@@ -16,6 +16,9 @@ let blockY;
 let blocks;
 let blockMovementDissabled = false;
 
+//Coordenada de los bloques que se rompen por el jugador
+let brokenPlatformY;
+
 //LETTER BLOCKS
 let groupLetterBlocks = [];
 //let letterArray = [['a','A'],['e','E'],['i','I']];
@@ -26,6 +29,7 @@ let letterBlockInPlatform; //En esta plataforma, en vez de hueco, hay letterBloc
 
 //TRAPS
 let traps;
+let incrementTrapAppearing;
 let trapAppearing; //Sirve para medir la proporcionalidad de que aparezcan trampas
 let trapShow;
 
@@ -179,7 +183,8 @@ function preloadPlay(){
 }
 
 function createPlay(){
-    levelConfig = JSON.parse(game.cache.getText('level')); 
+    levelConfig = JSON.parse(game.cache.getText('level'));
+    allowLetterBlocks = levelConfig.letterBlocks; 
     createPlayer();
     createCameraBounds();
     createKeyControls();
@@ -314,13 +319,14 @@ function createBlock(){
 
     //The letterBlocks from level 2
     groupLetterBlocks = [];
-    allowLetterBlocks = levelConfig.letterBlocks;
+    
     //allowLetterBlocks = true; 
     //console.log("allowLetterBlocks "+allowLetterBlocks);
 
     blockY = 0;
     let hole;
     trapAppearing = 15;
+    incrementTrapAppearing = 3;
     powerUpsAppearing = 30;
 
     //For each platform
@@ -329,7 +335,7 @@ function createBlock(){
         blockY += levelConfig.platforms[i].distance;
         hole = levelConfig.platforms[i].hole;
         blockX = firstBlockX;
-        trapAppearing += 3;
+        trapAppearing += incrementTrapAppearing;
         letterBlockInPlatform = levelConfig.platforms[i].isThereLetter;
         //console.log("letterBlockInPlatform "+ letterBlockInPlatform);
 
@@ -489,7 +495,10 @@ function playerHitsBlock(player, block){
     if(block.body.touching.up == true){
         //Si va más rápido que cierto valor, el bloque se rompe
         if(player.body.velocity.y >= VELOCITY_BREAKS_BLOCK)
-            block.kill();
+        {
+            brokenPlatformY = block.body.y;
+            //blocks.callAllExists(
+        }
 
         player.body.velocity.y =BOUNCE_CONSTANT;
         //Meter anim aquí
@@ -604,4 +613,75 @@ function createKeyControls(){
     leftBottom = game.input.keyboard.addKey(Phaser.Mouse.LEFT_BUTTON);
     rightBottom = game.input.keyboard.addKey(Phaser.Mouse.RIGHT_BUTTON);
 
+}
+
+function playerIsDead()
+{
+    playerFallAnimation.play();
+    player.x = levelConfig.playerStart.x;
+    player.y = levelConfig.playerStart.y;
+
+    //Poner vida del jugador a tope y actualizar lifeBar
+}
+
+function resetInput()
+{
+    //game.input.keyboard.enabled = false;
+    game.input.enabled = false;
+    cursorLeft.reset(true);
+    cursorRigh.reset(true);
+
+    
+}
+
+function clearLevel()
+{
+    //En esta función se borrar todos los elementos para volver a
+    //crearlos en el siguiente nivel
+
+    //Borrar LetterBlocks (si hay)
+    if(allowLetterBlocks == true)
+    {
+        for(let i=0; i<groupLetterBlocks.length; i++)
+        {
+            groupLetterBlocks[i].assignedLetter.destroy();
+            groupLetterBlocks[i].sprite.destroy();
+        }
+        groupLetterBlocks = [];
+    }
+
+    //Borrar bloques, trampas y powerups
+    blocks.removeAll(true);
+    traps.removeAll(true);
+    trapShow.removeAll(true);
+    endBlocks.removeAll(true);
+    powerUps.removeAll(true);
+
+    //Borrar elementos de UI
+    lifeBar.destroy();
+    containerLifeBar.destroy();
+    showName.destroy();
+    playerNameSpace.destroy();
+
+    //Borrar jugador
+    player.destroy();
+}
+
+function nextLevel()
+{
+    //El jugador va a pasar al siguiente nivel o vuelve a la pantalla 
+    //de start si ya ha acabado el juego
+    clearLevel();
+    currentLevel++;
+
+    if(currentLevel>levelsData.length)
+    {
+        game.world.setBounds(0, 0, game.width, game.height);
+        game.state.start('start');
+    }
+    else
+    {
+        game.input.enabled = true;
+        game.state.start('play');
+    }
 }
