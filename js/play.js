@@ -153,8 +153,8 @@ function preloadPlay(){
     
     //Enviroment
     //game.load.spritesheet('bloque', 'assets/imgs/New enviroment/spritesheet_tileset.png', 107, 107, 300);
-    game.load.image('bloque', 'assets/imgs/New enviroment/Tile_5.png');
-    game.load.image('spikes', 'assets/imgs/New enviroment/Tile_26.png');
+    game.load.image('bloque', 'assets/imgs/New enviroment/Tile_13.png');
+    game.load.image('spikes', 'assets/imgs/mina/mine1_off.png');
     game.load.image('spikesCollider', 'assets/imgs/New enviroment/Tile_26Collider.png');
     game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_28.png');
 
