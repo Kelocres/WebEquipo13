@@ -154,8 +154,8 @@ function preloadPlay(){
     //Enviroment
     //game.load.spritesheet('bloque', 'assets/imgs/New enviroment/spritesheet_tileset.png', 107, 107, 300);
     game.load.image('bloque', 'assets/imgs/New enviroment/Tile_13.png');
-    game.load.image('spikes', 'assets/imgs/mina/mine1_off.png');
-    game.load.image('spikesCollider', 'assets/imgs/New enviroment/Tile_26Collider.png');
+    game.load.image('spikes', 'assets/imgs/mina/mine1_off_Resize.png');
+    game.load.image('spikesCollider', 'assets/imgs/mina/mine1_off_ColliderResize.png');
     game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_28.png');
 
     //BackGrounds
@@ -493,11 +493,40 @@ function managePlayerVelocity(){
 function playerHitsBlock(player, block){
     //Que tanto en personaje como los bloques tengan colliders muy finos podrian solucionar el problema de que rebote si da en un lado del bloque
     if(block.body.touching.up == true){
+
+        console.log(block.body.y);
         //Si va más rápido que cierto valor, el bloque se rompe
         if(player.body.velocity.y >= VELOCITY_BREAKS_BLOCK)
         {
+            let destroyedBlocks = 0, destroyedTraps = 0, destroyedShowTraps = 0;
             brokenPlatformY = block.body.y;
-            //blocks.callAllExists(
+            blocks.forEach(function(everyBlock)
+            {
+                if(everyBlock.body.y == brokenPlatformY)
+                {
+                    everyBlock.destroy();
+                    destroyedBlocks++;
+                }
+            });
+            //Las trampas también tienen que desaparecer
+            traps.forEach(function(everyTrap)
+            {
+                if(everyTrap.body.y >= brokenPlatformY-10 && everyTrap.body.y < brokenPlatformY+10)
+                {
+                    everyTrap.destroy();
+                    destroyedTraps++;
+                };
+            });
+            trapShow.forEach(function(everyShowTrap)
+            {
+                if(everyShowTrap.body.y >= brokenPlatformY-10 && everyShowTrap.body.y < brokenPlatformY+10)
+                {
+                    everyShowTrap.destroy();
+                    destroyedShowTraps++;
+                }            
+            });
+
+            console.log("Blocks: "+destroyedBlocks+", Traps: "+destroyedTraps+", ShowTraps: "+ destroyedShowTraps);
         }
 
         player.body.velocity.y =BOUNCE_CONSTANT;
