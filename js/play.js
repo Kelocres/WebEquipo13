@@ -178,6 +178,8 @@ function preloadPlay(){
     game.load.image("cristal","assets/imgs/New enviroment/Tile_37ParaJuego.png");
 
     game.load.text("level",levelsData[currentLevel -1], true);
+    //game.load.text("level",levelsData[1], true);
+
     
 
 }
@@ -202,7 +204,7 @@ function createPlay(){
 
     //Para capturar los valores de las teclas del teclado, cuando haya LetterBlocks
     if(levelConfig.allowLetterBlocks == true)
-        game.input.keyboard.addCallbacks(this, null, null, keyPress);
+        game.input.keyboard.addCallbacks(this, null, null, teclaPulsada);
 
 }
 
@@ -475,7 +477,7 @@ function setUpEndBlock()
 
 //Se pulsa una tecla del teclado
 //Se comprueban los LetterBlocks cercanos
-function keyPress(char)
+function teclaPulsada(char)
 {
     for(let i=0; i<groupLetterBlocks.length; i++)
     {   let posInScreen = groupLetterBlocks[i].sprite.body.y-game.camera.y;
