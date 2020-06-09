@@ -4,6 +4,7 @@ const BOUNCE_CONSTANT = -150; // indice de rebote
 const BLOCK_SPEED = 3; // velocidad a la que los bloque se mueven
 const initBlockX = 80;// width of the block
 const initBlockY = 450; //400 + half height of the block
+const trapDamage = 0.1;
 
 //Velocidad a la que el jugador rompe un bloque
 const VELOCITY_BREAKS_BLOCK = 500;
@@ -47,8 +48,11 @@ let player;
 let playerLife;
 //let playerVelocity = 4;
 let playerAcceleration = 2;
+const powerAcceleration = 1.5;
+let powerUpAccelerateActive = true;
+
 let playerName ="randomMonster";
-let playerSprite
+let playerSprite;
 let playerScale = 0.14;
 const spriteDistance = 130;
 let playerFlexAnimation;
@@ -197,6 +201,7 @@ function createPlay(){
     game.physics.startSystem(Phaser.Physics.ARCADE);
     createUI();
 
+    playerLife = 100;
     velocidadTope = 0;
     playerSprite.bringToTop();//Puede que tenga más sentido que no esté así
 
@@ -211,7 +216,10 @@ function updatePlay(){
     manageBlockMovement();
     backToMove();
     game.physics.arcade.collide(player, blocks,playerHitsBlock,null,this);//.anchor para cambiar la animación
-    game.physics.arcade.collide(player, traps, playerHitsTrap, null, this);
+    game.physics.arcade.overlap(player, traps, playerHitsTrap, null, this);
+    game.physics.arcade.collide(player, trapShow, playerHitsTrapShow, null, this);
+    game.physics.arcade.collide(player, powerUps, playerHitspowerUp, null, this);
+
 
     for(let i=0; i<groupLetterBlocks.length; i++)
         if(groupLetterBlocks[i].solid == true)
@@ -491,6 +499,8 @@ function managePlayerVelocity(){
 }
 
 function playerHitsBlock(player, block){
+    
+    powerUpAccelerateActive = false;
     //Que tanto en personaje como los bloques tengan colliders muy finos podrian solucionar el problema de que rebote si da en un lado del bloque
     if(block.body.touching.up == true){
 
@@ -543,7 +553,7 @@ function playerHitsBlock(player, block){
 
 function playerHitsLB(player, letterBlock)
 {
-    
+    powerUpAccelerateActive = false;
     if(letterBlock.body.touching.up == true)
     {
         
@@ -561,8 +571,27 @@ function playerHitsLB(player, letterBlock)
 
 function playerHitsTrap(player, trap)
 {
+    powerUpAccelerateActive = false;
+    trap.destroy();
+    playerLife -= trapDamage* player.body.velocity.y;
     player.body.velocity.y =BOUNCE_CONSTANT;
-    console.log("Tocas una trampa");
+    console.log(playerLife);
+    
+}
+
+function playerHitsTrapShow(player, trap){
+    game.add.tween(trap).to( { alpha: 0 }, 1500, "Linear", true);
+
+}
+
+function playerHitspowerUp(player, powerUp){
+    powerUp.destroy();
+    playerAcceleration *= powerAcceleration;
+    powerUpAccelerateActive = true;
+
+    game.time.events.add(Phaser.Timer.SECOND * 4, function(){playerAcceleration = 2; powerUpAccelerateActive = false}, this);
+    //var timedEvent = this.time.delayedCall(3000, function(){playerAcceleration = 2; powerUpAccelerateActive = false}, [], this);
+    //var timedEvent = this.time.addEvent({ delay: 500, callback: function(){playerAcceleration = 2; powerUpAccelerateActive = false}, callbackScope: this, loop: true });
 }
 
 function spriteUpdate(){
