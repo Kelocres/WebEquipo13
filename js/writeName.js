@@ -72,6 +72,7 @@ function keyPress(char)
     //nombreJugador = nombreJugador + String.fromCharCode(char);
 
     changeName();
+   
 }
 
 function changeName()
