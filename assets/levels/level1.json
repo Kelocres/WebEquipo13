@@ -2,6 +2,7 @@
     "playerStart" : {"x": 200, "y": -50},
     "blocksPerPlatform": 10,
     "backgroundName": "BG_alien_3",
+    "levelNumber": 1,
     "platforms":    
     [
         {"distance": 200, "isThereLetter": false, "hole":5},

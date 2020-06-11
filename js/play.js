@@ -37,6 +37,10 @@ let trapShow;
 //POWER UPS
 let powerUps;
 let powerUpsAppearing;
+let powerUp1Actived;
+let powerUpAccelerateActive = true;
+const powerAcceleration = 1.5;
+let powerUp3Actived;
 
 // END OF LEVEL BLOCKS
 let endBlocks;
@@ -48,10 +52,7 @@ let player;
 let playerLife;
 //let playerVelocity = 4;
 let playerAcceleration = 2;
-const powerAcceleration = 1.5;
-let powerUpAccelerateActive = true;
-
-let playerName ="randomMonster";
+let playerName ="RandomMonster";
 let playerSprite;
 let playerScale = 0.14;
 const spriteDistance = 130;
@@ -73,8 +74,21 @@ let velocidadTope;
 //UI
 let containerLifeBar;
 let lifeBar;
-let showName;
-let styleShowName = { font: "24px Arial", fill: "#ffffff", align: "center" };
+let playerNameText;
+let styleShowName = { font: "12px Arial", fill: "#ffffff", align: "center" };
+let styleNumbers = { font: "22px Arial", fill: "#ffffff", align: "center" };
+let remainingPlatformsContainer;
+let currentLevelContainer;
+let powerUpContainer;
+let powerUp1Icon;
+let powerUpAccelerateIcon;
+let powerUp3Icon;
+let levelsIndicatorText;
+let levelsText;
+let levelsNumber;
+let RemainingPlatformsIndicatorText;
+let RemainingPlatformsText;
+let RemainingPlatformsNumber;
 
 let levelConfig;
 
@@ -178,6 +192,8 @@ function preloadPlay(){
     //game.load.image("redBlock", "assets/imgs/UI/RedBlock.png");
     //game.load.image("textBlock", "assets/imgs/UI/TextBlock.png");
     game.load.image("playerNameSpace", "assets/imgs/New UI/PNG/Main_UI/Boss_Name_Table.png");
+    game.load.image('circularContainer1',"assets/imgs/New UI/PNG/Main_UI/Bonus_BTN_01.png");
+    game.load.image('circularContainer2',"assets/imgs/New UI/PNG/Main_UI/Bonus_BTN_02.png");
 
     game.load.image("cristal","assets/imgs/New enviroment/Tile_37ParaJuego.png");
 
@@ -191,6 +207,7 @@ function preloadPlay(){
 function createPlay(){
     levelConfig = JSON.parse(game.cache.getText('level'));
     allowLetterBlocks = levelConfig.letterBlocks; 
+    levelsNumber = levelConfig.levelNumber;
     createPlayer();
     createCameraBounds();
     createKeyControls();
@@ -217,6 +234,8 @@ function updatePlay(){
     managePlayerVelocity();
     manageBlockMovement();
     backToMove();
+    RemainingPlatformsNumber = Phaser.Math.snapToFloor(20*(levelsNumber-1)+ (player.body.y +1)/200,1);//Corregir, no se cada cuanto pasas de bloque
+    manageUI();
     game.physics.arcade.collide(player, blocks,playerHitsBlock,null,this);//.anchor para cambiar la animación
     game.physics.arcade.overlap(player, traps, playerHitsTrap, null, this);
     game.physics.arcade.collide(player, trapShow, playerHitsTrapShow, null, this);
@@ -233,8 +252,6 @@ function updatePlay(){
 
     //if (background.y< 1536 && background.y>= backgoundBaseY-10) 
     background.y = backgoundBaseY + game.camera.y * backgroundMoveFactorY;
-
-    
 }
 
 function createPlayer(){
@@ -251,7 +268,7 @@ function createPlayer(){
 }
 
 function createCameraBounds(){
-    game.camera.bounds = (800,600);
+    game.camera.bounds = (800,400);
     game.camera.follow(player);
     game.camera.deadzone = new Phaser.Rectangle(0, 100, 800, 80);
     //https://phaser.io/examples/v2/camera/deadzone
@@ -259,6 +276,7 @@ function createCameraBounds(){
 }
 
 function createUI(){
+    //Top Left
     containerLifeBar = game.add.sprite(0,0,'containerLifeBar');
     lifeBar = game.add.sprite(0,0,'lifeBar');
     playerNameSpace = game.add.sprite(0,0,'playerNameSpace');
@@ -274,15 +292,48 @@ function createUI(){
     playerNameSpace.x = 0;
     playerNameSpace.y = 28;
 
-    
-    showName = game.add.text(200, 10, nombreJugador, styleShowName);
+    playerNameText = game.add.text(4, 32, playerName, styleShowName);
 
     containerLifeBar.fixedToCamera = true;
     lifeBar.fixedToCamera = true;
     playerNameSpace.fixedToCamera = true;
-    showName.fixedToCamera = true;
-
+    playerNameText.fixedToCamera = true;
     
+    //Botton right
+    //Containers && text
+    remainingPlatformsContainer = game.add.sprite(0,0,'circularContainer2');
+    currentLevelContainer = game.add.sprite(0,0,'circularContainer2');
+    powerUpContainer = game.add.sprite(0,0,'circularContainer1');
+    levelsIndicatorText = game.add.text(300, 727, "Level", styleShowName);
+    RemainingPlatformsIndicatorText = game.add.text(342, 705, "Remaining\nPlatforms", styleShowName);
+    levelsText = game.add.text(309, 761, "0", styleNumbers);
+    RemainingPlatformsText = game.add.text(365, 761, "0", styleNumbers);
+
+    remainingPlatformsContainer.scale.setTo(0.25,0.25);
+    currentLevelContainer.scale.setTo(0.25,0.25);
+    powerUpContainer.scale.setTo(0.25,0.25);
+
+    remainingPlatformsContainer.x = 345;
+    currentLevelContainer.x = 287.5;
+    powerUpContainer.x = 235;
+    remainingPlatformsContainer.y = currentLevelContainer.y = powerUpContainer.y = 745;
+
+    remainingPlatformsContainer.fixedToCamera = true;
+    currentLevelContainer.fixedToCamera = true;
+    powerUpContainer.fixedToCamera = true;
+    levelsIndicatorText.fixedToCamera = true;
+    RemainingPlatformsIndicatorText.fixedToCamera = true;
+    levelsText.fixedToCamera = true;
+    RemainingPlatformsText.fixedToCamera = true;
+
+    //Icons
+    powerUpAccelerateIcon = game.add.sprite(0,0,'cristal');
+    powerUpAccelerateIcon.scale.setTo(0.65,0.65);
+    powerUpAccelerateIcon.x = 246.5;
+    powerUpAccelerateIcon.y = 752.5;
+    powerUpAccelerateIcon.fixedToCamera = true;
+    powerUpAccelerateIcon.visible = false;
+
 }
 
 
@@ -613,6 +664,20 @@ function animationsUpdate(){
     }
 }
 
+function manageUI(){
+    if(powerUpAccelerateActive){
+        powerUpAccelerateIcon.visible = true;
+    }
+    else{
+        powerUpAccelerateIcon.visible = false;
+    }
+    updateText();
+}
+function updateText(){
+    levelsText.setText(levelsNumber);
+    RemainingPlatformsText.setText(RemainingPlatformsNumber);
+}
+
 function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, hacer que no se puedan movel los bloques
     if(!blockMovementDissabled){
         if(cursorRigh.isDown){
@@ -720,7 +785,7 @@ function clearLevel()
     //Borrar elementos de UI
     lifeBar.destroy();
     containerLifeBar.destroy();
-    showName.destroy();
+    playerNameText.destroy();
     playerNameSpace.destroy();
 
     //Borrar jugador
