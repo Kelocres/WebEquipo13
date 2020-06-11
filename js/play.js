@@ -1,5 +1,5 @@
 
-const BOUNCE_CONSTANT = -150; // indice de rebote
+const BOUNCE_CONSTANT = -170; // indice de rebote
 //const NUM_BLOCKS = 7;
 const BLOCK_SPEED = 3; // velocidad a la que los bloque se mueven
 const initBlockX = 80;// width of the block
@@ -516,24 +516,24 @@ function playerHitsBlock(player, block){
             {
                 if(everyBlock.body.y == brokenPlatformY)
                 {
-                    everyBlock.destroy();
+                    everyBlock.kill();
                     destroyedBlocks++;
                 }
             });
             //Las trampas también tienen que desaparecer
             traps.forEach(function(everyTrap)
             {
-                if(everyTrap.body.y >= brokenPlatformY-10 && everyTrap.body.y < brokenPlatformY+10)
+                if(everyTrap.body.y == brokenPlatformY)
                 {
-                    everyTrap.destroy();
+                    everyTrap.kill();
                     destroyedTraps++;
                 };
             });
             trapShow.forEach(function(everyShowTrap)
             {
-                if(everyShowTrap.body.y >= brokenPlatformY-10 && everyShowTrap.body.y < brokenPlatformY+10)
+                if(everyShowTrap.body.y == brokenPlatformY)
                 {
-                    everyShowTrap.destroy();
+                    everyShowTrap.kill();
                     destroyedShowTraps++;
                 }            
             });
