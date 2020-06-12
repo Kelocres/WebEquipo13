@@ -74,6 +74,7 @@ let velocidadTope;
 //UI
 let containerLifeBar;
 let lifeBar;
+const lifeBarRatio = 0.148;
 let playerNameText;
 let styleShowName = { font: "12px Arial", fill: "#ffffff", align: "center" };
 let styleNumbers = { font: "22px Arial", fill: "#ffffff", align: "center" };
@@ -89,6 +90,12 @@ let levelsNumber;
 let RemainingPlatformsIndicatorText;
 let RemainingPlatformsText;
 let RemainingPlatformsNumber;
+
+
+//walking enemy
+let walkingenemies;
+let numEnemies = 20;
+let enemyAppearing = 10;
 
 let levelConfig;
 
@@ -214,6 +221,7 @@ function createPlay(){
     createBlock();
     createAnimations();
     createBackground();
+    createWalkingEnemy();
 
     game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
 
@@ -223,6 +231,7 @@ function createPlay(){
     playerLife = 100;
     velocidadTope = 0;
     playerSprite.bringToTop();//Puede que tenga más sentido que no esté así
+    RemainingPlatformsNumber = 0;
 
     //Para capturar los valores de las teclas del teclado, cuando haya LetterBlocks
     if(levelConfig.allowLetterBlocks == true)
@@ -234,12 +243,16 @@ function updatePlay(){
     managePlayerVelocity();
     manageBlockMovement();
     backToMove();
-    RemainingPlatformsNumber = Phaser.Math.snapToFloor(20*(levelsNumber-1)+ (player.body.y +1)/200,1);//Corregir, no se cada cuanto pasas de bloque
+    RemainingPlatformsNumber = Phaser.Math.snapToFloor(20*(levelsNumber-1) + (player.body.y +1)/200,1);//Corregir, no se cada cuanto pasas de bloque
     manageUI();
     game.physics.arcade.collide(player, blocks,playerHitsBlock,null,this);//.anchor para cambiar la animación
     game.physics.arcade.overlap(player, traps, playerHitsTrap, null, this);
     game.physics.arcade.collide(player, trapShow, playerHitsTrapShow, null, this);
     game.physics.arcade.collide(player, powerUps, playerHitspowerUp, null, this);
+    
+    if(RemainingPlatformsNumber >= 20){
+          //  nextLevel();
+    }
 
 
     for(let i=0; i<groupLetterBlocks.length; i++)
@@ -282,7 +295,7 @@ function createUI(){
     playerNameSpace = game.add.sprite(0,0,'playerNameSpace');
 
     containerLifeBar.scale.setTo(0.4,0.4);
-    lifeBar.scale.setTo(0.148, 1.2);
+    lifeBar.scale.setTo(lifeBarRatio, 1.2);
     playerNameSpace.scale.setTo(0.45,0.45);
 
     containerLifeBar.x = 0;
@@ -337,6 +350,11 @@ function createUI(){
 }
 
 
+function actualizarVida(){
+    lifeBar.scale.setTo(lifeBarRatio * playerLife/100, 1.2);
+}
+
+
 function createBlock(){
 
     //First of all, set up the number of blocks
@@ -378,6 +396,11 @@ function createBlock(){
     game.physics.arcade.enable(endBlocks);
     endBlocks.createMultiple(blocksPerPlatform, 'bloque');
 
+    walkingenemies = game.add.group();
+    walkingenemies.enableBody = true;
+    game.physics.arcade.enable(walkingenemies);
+    walkingenemies.createMultiple(numEnemies, 'cristal');
+
     //The letterBlocks from level 2
     groupLetterBlocks = [];
     
@@ -411,6 +434,17 @@ function createBlock(){
 
     }
 
+}
+function createWalkingEnemy(){
+    walkingenemies = game.add.group();
+    walkingenemies.enableBody = true;
+    game.physics.arcade.enable(walkingenemies);
+    walkingenemies.createMultiple(numEnemies, 'cristal');
+}
+
+function setUpWalkingEnemy(){
+    let item = walkingenemies = game.add.group();
+    
 }
 
 function createAnimations(){
@@ -512,6 +546,16 @@ function setUpBlock(currentBlock, hole)
                     imgTrap.scale.setTo(0.3,0.3);
                 }
             }
+            /*else if(Math.floor(Math.random()* 100) <= enemyAppearing){//aparecera un walking enemy?
+                let wEnemy = walkingenemies.getFirstExists(false);
+                if(wEnemy)
+                {
+                    wEnemy.reset(blockX, blockY-50);
+                    wEnemy.body.checkCollision.left = true;
+                    wEnemy.body.checkCollision.up = true;
+                    wEnemy.body.checkCollision.right = true;
+                }
+            }*/
         }
         blockX+= initBlockX;
     }
@@ -628,7 +672,11 @@ function playerHitsTrap(player, trap)
     trap.destroy();
     playerLife -= trapDamage* player.body.velocity.y;
     player.body.velocity.y =BOUNCE_CONSTANT;
-    console.log(playerLife);
+    actualizarVida();
+
+    if(RemainingPlatformsNumber >= 20){
+        nextLevel();
+} 
     
 }
 
@@ -798,10 +846,10 @@ function nextLevel()
     //de start si ya ha acabado el juego
     clearLevel();
     currentLevel++;
+    console.log(currentLevel);
 
     if(currentLevel>levelsData.length)
     {
-        game.world.setBounds(0, 0, game.width, game.height);
         game.state.start('start');
     }
     else
