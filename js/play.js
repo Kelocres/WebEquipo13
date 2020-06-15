@@ -204,14 +204,17 @@ function preloadPlay(){
 
     game.load.image("cristal","assets/imgs/New enviroment/Tile_37ParaJuego.png");
 
-    game.load.text("level",levelsData[currentLevel -1], true);
-    //game.load.text("level",levelsData[1], true);
+    //game.load.text("level",levelsData[currentLevel -1], true);
+    game.load.text("level",levelsData[1], true);
 
     
 
 }
 
 function createPlay(){
+
+    console.log("Cargar nivel "+currentLevel);
+
     levelConfig = JSON.parse(game.cache.getText('level'));
     allowLetterBlocks = levelConfig.letterBlocks; 
     levelsNumber = levelConfig.levelNumber;
@@ -234,8 +237,11 @@ function createPlay(){
     RemainingPlatformsNumber = 0;
 
     //Para capturar los valores de las teclas del teclado, cuando haya LetterBlocks
-    if(levelConfig.allowLetterBlocks == true)
+    if(levelConfig.letterBlocks == true)
+    {
         game.input.keyboard.addCallbacks(this, null, null, teclaPulsada);
+        //console.log("Hay bloques");
+    }
 
 }
 
@@ -582,6 +588,7 @@ function setUpEndBlock()
 //Se comprueban los LetterBlocks cercanos
 function teclaPulsada(char)
 {
+    console.log("Pulso");
     for(let i=0; i<groupLetterBlocks.length; i++)
     {   let posInScreen = groupLetterBlocks[i].sprite.body.y-game.camera.y;
         if(posInScreen>0 && posInScreen<game.camera.height)
@@ -601,7 +608,7 @@ function playerHitsBlock(player, block){
     //Que tanto en personaje como los bloques tengan colliders muy finos podrian solucionar el problema de que rebote si da en un lado del bloque
     if(block.body.touching.up == true){
 
-        console.log(block.body.y);
+        //console.log(block.body.y);
         //Si va más rápido que cierto valor, el bloque se rompe
         if(player.body.velocity.y >= VELOCITY_BREAKS_BLOCK)
         {
