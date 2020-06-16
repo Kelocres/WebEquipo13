@@ -161,6 +161,25 @@ class LetterBlock {
         }
     }
 
+    movementMouse()
+    {
+        if(Math.abs(game.input.speed.x)<150)
+        {
+            this.sprite.body.x -= game.input.speed.x;
+            this.assignedLetter.body.x -= game.input.speed.x;
+            if(this.sprite.body.x < -initBlockX)
+            {
+                this.sprite.body.x += worldMargin + 2*initBlockX; // += para ajustar su verdadera posicion en relacion con lo demas boques
+                this.assignedLetter.body.x += worldMargin + 2*initBlockX;
+            }
+            if(this.sprite.body.x > 400 + initBlockX)
+            {
+                let aux = worldMargin + initBlockX - this.sprite.body.x;
+                this.sprite.body.x = -initBlockX - aux;
+                this.assignedLetter.body.x = -initBlockX - aux;
+            }
+        }
+    }
 
 }
 
@@ -735,7 +754,7 @@ function updateText(){
 
 function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, hacer que no se puedan movel los bloques
     if(!blockMovementDissabled){
-        if(cursorRigh.isDown){
+        if(cursorRigh.isDown/* || game.input.speed.x > 0*/){
             blocks.forEach(movementCursorRight, this);
             traps.forEach(movementCursorRight, this);
             trapShow.forEach(movementCursorRight, this);
@@ -746,7 +765,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             //playerSprite.scale.setTo(-playerScale,playerScale);
             if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX;
         }
-        if(cursorLeft.isDown){
+        if(cursorLeft.isDown/* || game.input.speed.x < 0*/){
             blocks.forEach(movementCursorLeft, this);
             traps.forEach(movementCursorLeft, this);
             trapShow.forEach(movementCursorLeft, this);
@@ -757,9 +776,26 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             //playerSprite.scale.setTo(playerScale,playerScale);
             if(background.x<(-background.x))background.x += backgroundMoveFactorX;
         }
+
+        // Ajustando con la velocidad del ratón
+        //console.log(game.input.speed.x);
+        blocks.forEach(movementMouse, this);
+        traps.forEach(movementMouse, this);
+        trapShow.forEach(movementMouse, this);
+        powerUps.forEach(movementMouse, this);
+        endBlocks.forEach(movementMouse, this);
+        for(let i=0; i<groupLetterBlocks.length; i++)
+            groupLetterBlocks[i].movementMouse();
+        //playerSprite.scale.setTo(-playerScale,playerScale);
+        if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX;
+        if(background.x<(-background.x))background.x += backgroundMoveFactorX;
+
+    
+        
     }  
 }
 
+// MOVIMIENTO CON LOS BOTONES
 function movementCursorRight(element)
 {
     element.body.x -= BLOCK_SPEED;
@@ -777,6 +813,22 @@ function movementCursorLeft(element)
         element.body.x = -initBlockX - aux;
     }
             
+}
+
+// MOVIMIENTO CON EL RATÓN
+function movementMouse(element)
+{
+    if(Math.abs(game.input.speed.x)<150)
+    {
+        element.body.x -= game.input.speed.x;
+        if(element.body.x < -initBlockX){
+            element.body.x += worldMargin + 2*initBlockX; // += para ajustar su verdadera posicion en relacion con lo demas boques
+        }
+        if(element.body.x > 400 + initBlockX){
+            let aux = worldMargin + initBlockX - element.body.x;
+            element.body.x = -initBlockX - aux;
+        }
+    }
 }
 
 function backToMove(){
