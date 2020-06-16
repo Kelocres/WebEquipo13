@@ -10,7 +10,9 @@ let key_intro
 //Variable string
 var nombreJugador;
 
-let botonesNombres = [];
+let botonNombre1, botonNombre2, botonNombre3;
+let textoNombre1, textoNombre2, textoNombre3;
+let predefinidos = ["Captain Rogers","Useless Ironman","I am a person"];
 
 //Estilo genérico
 var style = { font: "40px Arial", fill: "#ffffff", align: "left" };
@@ -20,20 +22,6 @@ let writeNameState = {
     create: createWN
 }
 
-class NameForUser
-{
-    
-    constructor(imagen, nombre)
-    {
-        this.nombre = nombre;
-
-        //this.button = game.add.button(this.x,this.y,'boton',this.cambiarNombre);
-        this.image = imagen;
-        this.showNombre = game.add.text(this.x+10, this.y+30, this.nombre, style);
-        //console.log(this.nombre);
-    }
-
-}
 
 function preloadWN()
 {
@@ -60,16 +48,22 @@ function createWN()
     //Botoncitos de nombres
     let alturasbotones = [100, 200, 300];
     //Nombres predifinidos
-    let predefinidos = ["Captain Rogers","Useless Ironman","I am a person"];
+    
 
-    for(let i=0; i<predefinidos.length; i++)
-    {
-        let imagenBoton = game.add.image(10,alturasbotones[i], 'boton');
-        let nuevoBoton = new NameForUser(imagenBoton, predefinidos[i]);
-        nuevoBoton.imagen.inputEnabled = true;
-        
-        botonesNombres.push(nuevoBoton);
-    }    
+   //Botón de nombre 1
+    botonNombre1 = game.add.button(30, alturasbotones[0], 'boton', escribirPredefinido1);
+    botonNombre1.scale.setTo(1.3,1);
+    textoNombre1 = game.add.text(40, alturasbotones[0], predefinidos[0], style);
+
+    //Botón de nombre 2
+    botonNombre2 = game.add.button(30, alturasbotones[1], 'boton', escribirPredefinido2);
+    botonNombre2.scale.setTo(1.3,1);
+    textoNombre2 = game.add.text(40, alturasbotones[1], predefinidos[1], style);
+
+    //Botón de nombre 3
+    botonNombre3 = game.add.button(30, alturasbotones[2], 'boton', escribirPredefinido3);
+    botonNombre3.scale.setTo(1.3,1);
+    textoNombre3 = game.add.text(40, alturasbotones[2], predefinidos[2], style);
 
     btnGoToPlay = game.add.button(100, 700, 'botonplay', startPlay);
 
@@ -80,7 +74,7 @@ function createWN()
     bmd.context.fillText(nombreJugador, 64, 600);
     bmd.addToWorld();
 
-    nombreJugador = "";
+    nombreJugador;
 
     key_backspace = game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
     key_backspace.onDown.add(borrarLetra, this);
@@ -101,11 +95,31 @@ function borrarLetra()
     nombreJugador = nombreJugador.substring(0,nombreJugador.length-1);
     changeName();
 }
+
+//Botones de nombres 
+
+function escribirPredefinido1()
+{
+    nombreJugador = predefinidos[0];
+    changeName();
+}
+function escribirPredefinido2()
+{
+    nombreJugador = predefinidos[1];
+    changeName();
+}
+function escribirPredefinido3()
+{
+    nombreJugador = predefinidos[2];
+    changeName();
+}
     
 
 function keyPress(char)
 {
-    nombreJugador = nombreJugador + char;
+    if(nombreJugador==null) nombreJugador = "";
+
+    if(nombreJugador.length < 20) nombreJugador = nombreJugador + char;
     //nombreJugador = nombreJugador + String.fromCharCode(char);
 
     changeName();
@@ -116,6 +130,13 @@ function changeName()
 {
         //Mostrar palabra
         bmd.cls();
+
+        //Cambiar tamaño fuente para los nombres largos
+        if(nombreJugador.length<7)           bmd.context.font = '64px Arial';
+        else if(nombreJugador.length<11)     bmd.context.font = '50px Arial';
+        else if(nombreJugador.length<15)     bmd.context.font = '40px Arial';
+        else                                 bmd.context.font = '35px Arial';
+
         var x = 64;
     
         for(var i = 0; i < nombreJugador.length; i++)
@@ -131,5 +152,5 @@ function changeName()
 
 function startPlay()
 {
-    game.state.start('play');
+    if(nombreJugador!=null && nombreJugador!="") game.state.start('play');
 }

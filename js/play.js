@@ -204,8 +204,8 @@ function preloadPlay(){
 
     game.load.image("cristal","assets/imgs/New enviroment/Tile_37ParaJuego.png");
 
-    //game.load.text("level",levelsData[currentLevel -1], true);
-    game.load.text("level",levelsData[1], true);
+    game.load.text("level",levelsData[currentLevel -1], true);
+    //game.load.text("level",levelsData[1], true);
 
     
 
