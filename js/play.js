@@ -2,7 +2,9 @@
 const BOUNCE_CONSTANT = -170; // indice de rebote
 //const NUM_BLOCKS = 7;
 const BLOCK_SPEED = 3; // velocidad a la que los bloque se mueven
-const initBlockX = 80;// width of the block
+//const initBlockX = 80;// width of the block
+const initBlockX = 77;// width of the block
+
 const initBlockY = 450; //400 + half height of the block
 const trapDamage = 0.1;
 
@@ -90,6 +92,10 @@ let levelsNumber;
 let RemainingPlatformsIndicatorText;
 let RemainingPlatformsText;
 let RemainingPlatformsNumber;
+
+//Messages of winning or losing
+let messWin;
+let messLose;
 
 
 //walking enemy
@@ -201,6 +207,7 @@ function preloadPlay(){
     game.load.image('spikes', 'assets/imgs/mina/mine1_off_Resize.png');
     game.load.image('spikesCollider', 'assets/imgs/mina/mine1_off_ColliderResize.png');
     game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_28.png');
+    game.load.image('meta', 'assets/imgs/New enviroment/meta.png');
 
     //BackGrounds
     game.load.image('BG_alien_3','assets/imgs/New enviroment/BackGrounds/BG alien 3.jpg');
@@ -274,6 +281,7 @@ function updatePlay(){
     game.physics.arcade.overlap(player, traps, playerHitsTrap, null, this);
     game.physics.arcade.collide(player, trapShow, playerHitsTrapShow, null, this);
     game.physics.arcade.collide(player, powerUps, playerHitspowerUp, null, this);
+    game.physics.arcade.collide(player, endBlocks, playerHitsEndBlocks, null, this);
     
     if(RemainingPlatformsNumber >= 20){
           //  nextLevel();
@@ -372,6 +380,9 @@ function createUI(){
     powerUpAccelerateIcon.fixedToCamera = true;
     powerUpAccelerateIcon.visible = false;
 
+    //Messages of winning or losing
+
+
 }
 
 
@@ -419,7 +430,8 @@ function createBlock(){
     endBlocks = game.add.group();
     endBlocks.enableBody = true;
     game.physics.arcade.enable(endBlocks);
-    endBlocks.createMultiple(blocksPerPlatform, 'bloque');
+    endBlocks.createMultiple(blocksPerPlatform, 'meta');
+    //endBlocks.callAll('scale.setTo','scale',1, 2);
 
     walkingenemies = game.add.group();
     walkingenemies.enableBody = true;
@@ -674,6 +686,16 @@ function playerHitsBlock(player, block){
     }
 }
 
+function playerHitsEndBlocks(player, endBlock)
+{
+    //Mostrar mensaje de victoria
+    //Temporizador para tardar un poco en pasar al siguiente nivel
+    //Fade out opcional
+
+    nextLevel();
+
+}
+
 function playerHitsLB(player, letterBlock)
 {
     powerUpAccelerateActive = false;
@@ -778,19 +800,20 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
         }
 
         // Ajustando con la velocidad del ratón
-        //console.log(game.input.speed.x);
-        blocks.forEach(movementMouse, this);
-        traps.forEach(movementMouse, this);
-        trapShow.forEach(movementMouse, this);
-        powerUps.forEach(movementMouse, this);
-        endBlocks.forEach(movementMouse, this);
-        for(let i=0; i<groupLetterBlocks.length; i++)
-            groupLetterBlocks[i].movementMouse();
-        //playerSprite.scale.setTo(-playerScale,playerScale);
-        if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX;
-        if(background.x<(-background.x))background.x += backgroundMoveFactorX;
+        if(game.input.activePointer.leftButton.isDown) //Botón izquierdo del ratón pulsado
+        {
+            blocks.forEach(movementMouse, this);
+            traps.forEach(movementMouse, this);
+            trapShow.forEach(movementMouse, this);
+            powerUps.forEach(movementMouse, this);
+            endBlocks.forEach(movementMouse, this);
+            for(let i=0; i<groupLetterBlocks.length; i++)
+                groupLetterBlocks[i].movementMouse();
+            //playerSprite.scale.setTo(-playerScale,playerScale);
+            if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX;
+            if(background.x<(-background.x))background.x += backgroundMoveFactorX;
 
-    
+        }
         
     }  
 }

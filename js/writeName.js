@@ -85,7 +85,8 @@ function createWN()
     //  Capture all key presses
     game.input.keyboard.addCallbacks(this, null, null, keyPress);
 
-    //startPlay();
+    //startPlay()
+    if(nombreJugador!=null) changeName();
 }
 
 
@@ -152,5 +153,6 @@ function changeName()
 
 function startPlay()
 {
+    currentLevel = 1;
     if(nombreJugador!=null && nombreJugador!="") game.state.start('play');
 }
