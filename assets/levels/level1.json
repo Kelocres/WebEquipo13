@@ -1,5 +1,5 @@
 {
-    "playerStart" : {"x": 200, "y": -50},
+    "playerStart" : {"x": 200, "y": 30},
     "blocksPerPlatform": 10,
     "backgroundName": "BG_alien_3",
     "levelNumber": 1,

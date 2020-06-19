@@ -97,6 +97,12 @@ let RemainingPlatformsNumber;
 let messWin;
 let messLose;
 
+//Fx
+let EXPLOSION_GROUP_SIZE = 30;
+let explosions;
+//let ROCKS_EMITTERS_GROUP_SIZE = 30;
+//let rocks;
+let rocksEmitter;
 
 //walking enemy
 let walkingenemies;
@@ -219,7 +225,8 @@ function preloadPlay(){
     game.load.image('playerBox','assets/imgs/New Player/jump/playerBox.png');
 
     //FX
-    game.load.spritesheet('explosion','assets/imgs/Mina/Explosion_SpriteSheet.png',420,420,58);
+    game.load.spritesheet('explosion','assets/imgs/Mina/Explosion_SpriteSheet.png',210,210,58);
+    game.load.image('rock','assets/imgs/New enviroment/Tile_17.png')
 
     //UI
     game.load.image("containerLifeBar", "assets/imgs/New UI/PNG/Main_UI/Health_Bar_Table.png");
@@ -254,6 +261,8 @@ function createPlay(){
     createAnimations();
     createBackground();
     createWalkingEnemy();
+    createExplosions(EXPLOSION_GROUP_SIZE);
+    createEmitter();
 
     game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
 
@@ -387,6 +396,19 @@ function createUI(){
 
 }
 
+function createExplosions(number){
+    explosions = game.add.group();
+    explosions.enableBody = true;
+    explosions.createMultiple(number, 'explosion');
+    explosions.forEach(setupExplosion, this);
+}
+
+function setupExplosion(explosion){
+    //explosion.anchor.x = 0.5;
+    //explosion.anchor.y = 0.5;
+    explosion.animations.add('explosion');
+}
+
 
 function actualizarVida(){
     lifeBar.scale.setTo(lifeBarRatio * playerLife/100, 1.2);
@@ -495,6 +517,15 @@ function createAnimations(){
 function createBackground(){
     background = game.add.sprite(backgoundBaseX,backgoundBaseY,levelConfig.backgroundName);
     background.sendToBack();
+}
+
+function createEmitter(){
+    rocksEmitter = game.add.emitter(0, 0, 100);
+    rocksEmitter.makeParticles('rock');
+    rocksEmitter.gravity = 200;
+    rocksEmitter.minParticleScale = 0.25;
+    rocksEmitter.maxParticleScale = 0.35;
+    rocksEmitter.setAlpha(1, 0, 2000);
 }
 
 function setUpBlock(currentBlock, hole)
@@ -651,6 +682,7 @@ function playerHitsBlock(player, block){
             {
                 if(everyBlock.body.y == brokenPlatformY)
                 {
+                    throwRocks(everyBlock);
                     everyBlock.kill();
                     destroyedBlocks++;
                 }
@@ -688,6 +720,12 @@ function playerHitsBlock(player, block){
     }
 }
 
+function throwRocks(element){
+    rocksEmitter.x = element.body.center.x;
+    rocksEmitter.y = element.body.center.y;
+    rocksEmitter.start(true, 2000, null, 10);
+}
+
 function playerHitsEndBlocks(player, endBlock)
 {
     //Mostrar mensaje de victoria
@@ -719,6 +757,7 @@ function playerHitsLB(player, letterBlock)
 function playerHitsTrap(player, trap)
 {
     powerUpAccelerateActive = false;
+    displayExplosion(trap);
     trap.destroy();
     playerLife -= trapDamage* player.body.velocity.y;
     player.body.velocity.y =BOUNCE_CONSTANT;
@@ -731,7 +770,7 @@ function playerHitsTrap(player, trap)
 }
 
 function playerHitsTrapShow(player, trap){
-    game.add.tween(trap).to( { alpha: 0 }, 1500, "Linear", true);
+    game.add.tween(trap).to( { alpha: 0 }, 150, "Linear", true);
 
 }
 
@@ -785,6 +824,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             trapShow.forEach(movementCursorRight, this);
             powerUps.forEach(movementCursorRight, this);
             endBlocks.forEach(movementCursorRight, this);
+            explosions.forEach(movementCursorRight,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementRight();
             //playerSprite.scale.setTo(-playerScale,playerScale);
@@ -796,6 +836,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             trapShow.forEach(movementCursorLeft, this);
             powerUps.forEach(movementCursorLeft, this);
             endBlocks.forEach(movementCursorLeft, this);
+            explosions.forEach(movementCursorLeft,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementLeft();
             //playerSprite.scale.setTo(playerScale,playerScale);
@@ -810,6 +851,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             trapShow.forEach(movementMouse, this);
             powerUps.forEach(movementMouse, this);
             endBlocks.forEach(movementMouse, this);
+            explosions.forEach(movementMouse,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementMouse();
             //playerSprite.scale.setTo(-playerScale,playerScale);
@@ -819,6 +861,15 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
         }
         
     }  
+}
+
+function displayExplosion(trap) {
+    let explosion = explosions.getFirstExists(false);
+    let x = trap.body.center.x - explosion.width/2;
+    let y = trap.body.center.y - explosion.height*0.735;
+    explosion.reset(x, y);
+    //explosion.bringToTop();
+    explosion.play('explosion', 30, false, true);
 }
 
 // MOVIMIENTO CON LOS BOTONES
