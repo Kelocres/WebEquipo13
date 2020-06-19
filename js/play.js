@@ -218,6 +218,9 @@ function preloadPlay(){
     game.load.spritesheet('playerSprite','assets/imgs/New Player/jump/player_jump_spritesheet_good.png',441,474,14);
     game.load.image('playerBox','assets/imgs/New Player/jump/playerBox.png');
 
+    //FX
+    game.load.spritesheet('explosion','assets/imgs/Mina/Explosion_SpriteSheet.png',420,420,58);
+
     //UI
     game.load.image("containerLifeBar", "assets/imgs/New UI/PNG/Main_UI/Health_Bar_Table.png");
     //game.load.image("bigTextBlock", "assets/imgs/UI/BigTextBlock.png");
@@ -275,7 +278,6 @@ function updatePlay(){
     managePlayerVelocity();
     manageBlockMovement();
     backToMove();
-    RemainingPlatformsNumber = Phaser.Math.snapToFloor(20*(levelsNumber-1) + (player.body.y +1)/200,1);//Corregir, no se cada cuanto pasas de bloque
     manageUI();
     game.physics.arcade.collide(player, blocks,playerHitsBlock,null,this);//.anchor para cambiar la animación
     game.physics.arcade.overlap(player, traps, playerHitsTrap, null, this);
@@ -761,6 +763,7 @@ function animationsUpdate(){
 }
 
 function manageUI(){
+    RemainingPlatformsNumber = 20 - Phaser.Math.snapToFloor((player.body.y +1)/200,1);//Corregir, no se cada cuanto pasas de bloque
     if(powerUpAccelerateActive){
         powerUpAccelerateIcon.visible = true;
     }
