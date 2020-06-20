@@ -92,6 +92,8 @@ let levelsNumber;
 let RemainingPlatformsIndicatorText;
 let RemainingPlatformsText;
 let RemainingPlatformsNumber;
+let PastPlatforms;
+let DistanceToNextPlatform;
 
 //Messages of winning or losing
 let messWin;
@@ -100,8 +102,6 @@ let messLose;
 //Fx
 let EXPLOSION_GROUP_SIZE = 30;
 let explosions;
-//let ROCKS_EMITTERS_GROUP_SIZE = 30;
-//let rocks;
 let rocksEmitter;
 
 //walking enemy
@@ -272,7 +272,9 @@ function createPlay(){
     playerLife = 100;
     velocidadTope = 0;
     playerSprite.bringToTop();//Puede que tenga más sentido que no esté así
-    RemainingPlatformsNumber = 0;
+    RemainingPlatformsNumber = levelConfig.platforms.length;
+    PastPlatforms = 0;
+    DistanceToNextPlatform = levelConfig.platforms[PastPlatforms];
 
     //Para capturar los valores de las teclas del teclado, cuando haya LetterBlocks
     if(levelConfig.letterBlocks == true)
@@ -802,7 +804,12 @@ function animationsUpdate(){
 }
 
 function manageUI(){
-    RemainingPlatformsNumber = 20 - Phaser.Math.snapToFloor((player.body.y +1)/200,1);//Corregir, no se cada cuanto pasas de bloque
+    if (player.body.y >= (DistanceToNextPlatform+10)){
+        PastPlatforms+=1;
+        DistanceToNextPlatform += levelConfig.platforms[PastPlatforms];
+        RemainingPlatformsNumber-= 1;
+    }
+    //RemainingPlatformsNumber = 20 - Phaser.Math.snapToFloor((player.body.y +1)/200,1);//Corregir, no se cada cuanto pasas de bloque
     if(powerUpAccelerateActive){
         powerUpAccelerateIcon.visible = true;
     }
