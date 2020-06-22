@@ -120,6 +120,17 @@ let capPowerUpActive = false;
 const capPowerAcceleration = 3;
 const capPwerUpRate = 50;
 
+//Fall in and fall out
+let fallIn;
+let fallOut;
+const probTpAppear = 0.02;
+
+//mine turtle
+let mineTurtles;
+let allowMineTurlte;
+
+
+
 let levelConfig;
 
 let levelsData = ['assets/levels/level1.json','assets/levels/level2.json'];
@@ -226,6 +237,10 @@ function preloadPlay(){
     game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_28.png');
     game.load.image('meta', 'assets/imgs/New enviroment/meta.png');
     game.load.image('camerica', 'assets/imgs/camerica.png');
+    game.load.image('hello', 'assets/imgs/hello.png');
+    
+    game.load.image('fallInTo', 'assets/imgs/mina/mine3_on.png');
+    game.load.image('fallOutOf', 'assets/imgs/mina/mine3_off.png');
 
     //BackGrounds
     game.load.image('BG_alien_3','assets/imgs/New enviroment/BackGrounds/BG alien 3.jpg');
@@ -279,13 +294,14 @@ function preloadPlay(){
 
 function createPlay(){
 
-    console.log("Cargar nivel "+currentLevel);
+    console.log("Cargar nivel "+ currentLevel);
 
     levelConfig = JSON.parse(game.cache.getText('level'));
     allowLetterBlocks = levelConfig.letterBlocks; 
     allowMegaPowerUps = levelConfig.megaPowerUps;
     allowMovingObstacles =levelConfig.movingObstacles;
     levelsNumber = levelConfig.levelNumber;
+    allowMineTurlte = levelConfig.allowMineTurlte;
     createPlayer();
     createCameraBounds();
     createKeyControls();
@@ -325,11 +341,15 @@ function updatePlay(){
     game.physics.arcade.collide(player, trapShow, playerHitsTrapShow, null, this);
     game.physics.arcade.collide(player, capPowerUp, playerHitsCapPowerUp, null, this);
     game.physics.arcade.collide(player, walkingenemies, playerHitsTrap, null, this);
+    game.physics.arcade.collide(player, mineTurtles, playerHitsTrap, null, this);
     game.physics.arcade.collide(player, powerUps, playerHitspowerUp, null, this);
     game.physics.arcade.collide(player, endBlocks, playerHitsEndBlocks, null, this);
-    game.physics.arcade.collide(walkingenemies, blocks, null, null, this);
+    game.physics.arcade.overlap(walkingenemies, blocks, function(mine){ mine.body.velocity.y = 0; mine.body.y-=1}, null, this);
+    game.physics.arcade.overlap(mineTurtles, blocks, function(mine){ mine.body.velocity.y = 0; mine.body.y-=1}, null, this);
+    game.physics.arcade.collide(player, endBlocks, playerHitsFallInto, null, this);
     
     walkingenemies.forEach(chasePlayer, this);
+    mineTurtles.forEach(chasePlayer, this);
 
     for(let i=0; i<groupLetterBlocks.length; i++)
         if(groupLetterBlocks[i].solid == true)
@@ -342,7 +362,7 @@ function updatePlay(){
     //if (background.y< 1536 && background.y>= backgoundBaseY-10) 
     background.y = backgoundBaseY + game.camera.y * backgroundMoveFactorY;
 
-    if(player.body.velocity.y <= speedthreshold){
+    if(player.enable && player.body.velocity.y <= speedthreshold){
         capPowerUpActive = false;
         powerUpAccelerateActive = false;
     }
@@ -497,6 +517,20 @@ function createBlock(){
     game.physics.arcade.enable(powerUps);
     powerUps.createMultiple(numPlatforms, 'cristal');
 
+    //Fall In
+    fallIn = game.add.group();
+    fallIn.enableBody = true;
+    game.physics.arcade.enable(fallIn);
+    fallIn.createMultiple(numBlocks, 'fallInTo');
+    fallIn.callAll('anchor.setTo','anchor',0, 1.0);
+
+    //Fall Out
+    fallOut = game.add.group();
+    fallOut.enableBody = true;
+    game.physics.arcade.enable(fallOut);
+    fallOut.createMultiple(numBlocks, 'fallOutOf');
+    fallOut.callAll('anchor.setTo','anchor',0, 1.0);
+
     //The group of cap powerups
     capPowerUp = game.add.group();
     capPowerUp.enableBody = true;
@@ -514,6 +548,11 @@ function createBlock(){
     walkingenemies.enableBody = true;
     game.physics.arcade.enable(walkingenemies);
     walkingenemies.createMultiple(numEnemies, 'cristal');
+
+    mineTurtles = game.add.group();
+    mineTurtles.enableBody = true;
+    game.physics.arcade.enable(mineTurtles);
+    mineTurtles.createMultiple(numEnemies, 'hello');
 
     //The letterBlocks from level 2
     groupLetterBlocks = [];
@@ -636,8 +675,14 @@ function setUpBlock(currentBlock, hole)
                 
             }
         }
-
-
+        //will appear a teleporter
+        else if(Math.floor(Math.random()* 100) <= probTpAppear*player.body.y){
+            let redTp = traps.getFirstExists(false);
+            if(redTp)
+            { 
+                
+            }
+        }
         //It's just another block
         else
         {
@@ -673,16 +718,33 @@ function setUpBlock(currentBlock, hole)
                     imgTrap.scale.setTo(0.3,0.3);
                 }
             }
-            else if(allowMovingObstacles && Math.floor(Math.random()* 100) <= enemyAppearing){//aparecera un walking enemy?
-                let wEnemy = walkingenemies.getFirstExists(false);
-                if(wEnemy)
-                {
-                    wEnemy.reset(blockX, blockY-70);
-                    wEnemy.body.bounce.setTo(1,1);
-                    wEnemy.body.checkCollision.left = true;
-                    wEnemy.body.checkCollision.up = true;
-                    wEnemy.body.checkCollision.right = true;
-                    wEnemy.body.checkCollision.down = true;
+            else if(allowMovingObstacles && Math.floor(Math.random()* 100 <= enemyAppearing)){//aparecera un walking enemy?
+                if(allowMineTurlte && Math.floor(Math.random()* 100 <= 50)){
+                    let wEnemy = mineTurtles.getFirstExists(false);
+                    if(wEnemy)
+                    {
+                        wEnemy.reset(blockX, blockY-120);
+                        wEnemy.scale.setTo(0.15,0.15);
+                        wEnemy.body.checkCollision.left = true;
+                        wEnemy.body.checkCollision.up = true;
+                        wEnemy.body.checkCollision.right = true;
+                        wEnemy.body.checkCollision.down = true;
+                        wEnemy.body.velocity.y = 20;
+                    }
+                }
+                else{
+
+                    let wEnemy = walkingenemies.getFirstExists(false);
+                    if(wEnemy)
+                    {
+                        wEnemy.reset(blockX, blockY-70);
+                        wEnemy.body.bounce.setTo(0,0.2);
+                        wEnemy.body.checkCollision.left = true;
+                        wEnemy.body.checkCollision.up = true;
+                        wEnemy.body.checkCollision.right = true;
+                        wEnemy.body.checkCollision.down = true;
+                        wEnemy.body.velocity.y = 20;
+                    }
                 }
             }
         }
@@ -725,9 +787,6 @@ function managePlayerVelocity(){
     //playerVelocity += playerAcceleration;
 }
 
-function walkStop(walk){
-    walk.body.velocity.y = 0;
-}
 
 function playerHitsBlock(player, block){
     
@@ -837,6 +896,10 @@ function playerHitsTrapShow(player, trap){
 
 }
 
+function playerHitsFallInto(player){
+    //player.body.x = fall
+}
+
 function playerHitspowerUp(player, powerUp){
     powerUp.destroy();
     playerAcceleration *= powerAcceleration;
@@ -895,6 +958,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             explosions.forEach(movementCursorRight,this);
             walkingenemies.forEach(movementCursorRight,this);
             capPowerUp.forEach(movementCursorRight,this);
+            mineTurtles.forEach(movementCursorRight,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementRight();
             //playerSprite.scale.setTo(-playerScale,playerScale);
@@ -909,6 +973,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             explosions.forEach(movementCursorLeft,this);
             walkingenemies.forEach(movementCursorLeft,this);
             capPowerUp.forEach(movementCursorLeft,this);
+            mineTurtles.forEach(movementCursorLeft,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementLeft();
             //playerSprite.scale.setTo(playerScale,playerScale);
@@ -925,6 +990,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             endBlocks.forEach(movementMouse, this);
             explosions.forEach(movementMouse,this);
             walkingenemies.forEach(movementMouse,this);
+            mineTurtles.forEach(movementMouse,this);
             capPowerUp.forEach(movementMouse,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementMouse();
@@ -946,7 +1012,7 @@ function chasePlayer(element){
             element.body.x -= crawlSpeed;
         }
     }
-    element.body.velocity.y += 5;
+    element.body.velocity.y  += 10;
 }
 
 function displayExplosion(trap) {
@@ -1053,6 +1119,9 @@ function clearLevel()
     powerUps.removeAll(true);
     walkingenemies.removeAll(true);
     capPowerUp.removeAll(true);
+    mineTurtles.removeAll(true);
+    fallIn.removeAll(true);
+    fallOut.removeAll(true);
 
     //Borrar elementos de UI
     lifeBar.destroy();

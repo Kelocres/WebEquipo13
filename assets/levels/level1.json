@@ -29,5 +29,6 @@
 
     "letterBlocks" : false,
     "megaPowerUps" : false,
-    "movingObstacles" : false
+    "movingObstacles" : false,
+    "allowMineTurlte" : false
 }
