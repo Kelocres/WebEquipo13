@@ -3,7 +3,7 @@ let endState = {
     update: updateEndGame,
 }
 
-let pressR;
+let pressS;
 
 function createEndGame(){
     let textTitle = 'PRESS R TO PLAY AGAIN';
@@ -15,16 +15,16 @@ function createEndGame(){
     };
     game.add.text(55, 25, textTitle, styleTitle);
 
-    pressR = game.input.keyboard.addKey(Phaser.Keyboard.R);
+    pressR = game.input.keyboard.addKey(Phaser.Keyboard.S);
 }
 
 function updateEndGame(){
-    checkR();
+    checkS();
 }
 
 
-function checkR (){
-    if(pressR.isDown){
+function checkS (){
+    if(pressS.isDown){
         currentLevel = 1;
         game.state.start('play');
     }
