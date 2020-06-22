@@ -108,6 +108,10 @@ let rocksEmitter;
 let walkingenemies;
 let numEnemies = 20;
 let enemyAppearing = 10;
+const crawlSpeed = 0.8;
+let allowMovingObstacles;
+
+let allowMegaPowerUps;
 
 let levelConfig;
 
@@ -214,6 +218,7 @@ function preloadPlay(){
     game.load.image('spikesCollider', 'assets/imgs/mina/mine1_off_ColliderResize.png');
     game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_28.png');
     game.load.image('meta', 'assets/imgs/New enviroment/meta.png');
+    game.load.image('camerica', 'assets/imgs/camerica.png');
 
     //BackGrounds
     game.load.image('BG_alien_3','assets/imgs/New enviroment/BackGrounds/BG alien 3.jpg');
@@ -243,7 +248,25 @@ function preloadPlay(){
     game.load.text("level",levelsData[currentLevel -1], true);
     //game.load.text("level",levelsData[1], true);
 
-    
+    // load moving obstacle anim
+    game.load.image('mo0',"assets/imgs/Bicho que anda/run/alien_9-run0.png");
+    game.load.image('mo1',"assets/imgs/Bicho que anda/run/alien_9-run1.png");
+    game.load.image('mo2',"assets/imgs/Bicho que anda/run/alien_9-run2.png");
+    game.load.image('mo3',"assets/imgs/Bicho que anda/run/alien_9-run3.png");
+    game.load.image('mo4',"assets/imgs/Bicho que anda/run/alien_9-run4.png");
+    game.load.image('mo5',"assets/imgs/Bicho que anda/run/alien_9-run5.png");
+    game.load.image('mo6',"assets/imgs/Bicho que anda/run/alien_9-run6.png");
+    game.load.image('mo7',"assets/imgs/Bicho que anda/run/alien_9-run7.png");
+    game.load.image('mo8',"assets/imgs/Bicho que anda/run/alien_9-run8.png");
+    game.load.image('mo9',"assets/imgs/Bicho que anda/run/alien_9-run9.png");
+    game.load.image('mo10',"assets/imgs/Bicho que anda/run/alien_9-run10.png");
+    game.load.image('mo11',"assets/imgs/Bicho que anda/run/alien_9-run11.png");
+    game.load.image('mo12',"assets/imgs/Bicho que anda/run/alien_9-run12.png");
+    game.load.image('mo13',"assets/imgs/Bicho que anda/run/alien_9-run13.png");
+    game.load.image('mo14',"assets/imgs/Bicho que anda/run/alien_9-run14.png");
+    game.load.image('mo015',"assets/imgs/Bicho que anda/run/alien_9-run15.png");
+    game.load.image('mo016',"assets/imgs/Bicho que anda/run/alien_9-run16.png");
+
 
 }
 
@@ -253,6 +276,8 @@ function createPlay(){
 
     levelConfig = JSON.parse(game.cache.getText('level'));
     allowLetterBlocks = levelConfig.letterBlocks; 
+    allowMegaPowerUps = levelConfig.megaPowerUps;
+    allowMovingObstacles =levelConfig.movingObstacles;
     levelsNumber = levelConfig.levelNumber;
     createPlayer();
     createCameraBounds();
@@ -260,7 +285,6 @@ function createPlay(){
     createBlock();
     createAnimations();
     createBackground();
-    createWalkingEnemy();
     createExplosions(EXPLOSION_GROUP_SIZE);
     createEmitter();
 
@@ -293,13 +317,12 @@ function updatePlay(){
     game.physics.arcade.collide(player, blocks,playerHitsBlock,null,this);//.anchor para cambiar la animación
     game.physics.arcade.overlap(player, traps, playerHitsTrap, null, this);
     game.physics.arcade.collide(player, trapShow, playerHitsTrapShow, null, this);
+    game.physics.arcade.collide(player, walkingenemies, playerHitsTrap, null, this);
     game.physics.arcade.collide(player, powerUps, playerHitspowerUp, null, this);
     game.physics.arcade.collide(player, endBlocks, playerHitsEndBlocks, null, this);
+    game.physics.arcade.collide(walkingenemies, blocks, null, null, this);
     
-    if(RemainingPlatformsNumber >= 20){
-          //  nextLevel();
-    }
-
+    walkingenemies.forEach(chasePlayer, this);
 
     for(let i=0; i<groupLetterBlocks.length; i++)
         if(groupLetterBlocks[i].solid == true)
@@ -498,17 +521,6 @@ function createBlock(){
     }
 
 }
-function createWalkingEnemy(){
-    walkingenemies = game.add.group();
-    walkingenemies.enableBody = true;
-    game.physics.arcade.enable(walkingenemies);
-    walkingenemies.createMultiple(numEnemies, 'cristal');
-}
-
-function setUpWalkingEnemy(){
-    let item = walkingenemies = game.add.group();
-    
-}
 
 function createAnimations(){
     playerFlexAnimation = playerSprite.animations.add("flex",[11,12,13,0,1,2,3,4],20,false);
@@ -570,6 +582,9 @@ function setUpBlock(currentBlock, hole)
             //Will a power up appear here?
             else if(Math.floor(Math.random()* 100) <= powerUpsAppearing)
             {
+                if(currentLevel >= 2){
+
+                }
                 let itemPower = powerUps.getFirstExists(false);
                 if(itemPower)
                 {
@@ -618,16 +633,18 @@ function setUpBlock(currentBlock, hole)
                     imgTrap.scale.setTo(0.3,0.3);
                 }
             }
-            /*else if(Math.floor(Math.random()* 100) <= enemyAppearing){//aparecera un walking enemy?
+            else if(allowMovingObstacles && Math.floor(Math.random()* 100) <= enemyAppearing){//aparecera un walking enemy?
                 let wEnemy = walkingenemies.getFirstExists(false);
                 if(wEnemy)
                 {
-                    wEnemy.reset(blockX, blockY-50);
+                    wEnemy.reset(blockX, blockY-70);
+                    wEnemy.body.bounce.setTo(1,1);
                     wEnemy.body.checkCollision.left = true;
                     wEnemy.body.checkCollision.up = true;
                     wEnemy.body.checkCollision.right = true;
+                    wEnemy.body.checkCollision.down = true;
                 }
-            }*/
+            }
         }
         blockX+= initBlockX;
     }
@@ -666,6 +683,10 @@ function teclaPulsada(char)
 function managePlayerVelocity(){
     player.body.velocity.y += playerAcceleration;
     //playerVelocity += playerAcceleration;
+}
+
+function walkStop(walk){
+    walk.body.velocity.y = 0;
 }
 
 function playerHitsBlock(player, block){
@@ -764,10 +785,6 @@ function playerHitsTrap(player, trap)
     playerLife -= trapDamage* player.body.velocity.y;
     player.body.velocity.y =BOUNCE_CONSTANT;
     actualizarVida();
-
-    if(RemainingPlatformsNumber >= 20){
-        nextLevel();
-} 
     
 }
 
@@ -832,6 +849,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             powerUps.forEach(movementCursorRight, this);
             endBlocks.forEach(movementCursorRight, this);
             explosions.forEach(movementCursorRight,this);
+            walkingenemies.forEach(movementCursorRight,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementRight();
             //playerSprite.scale.setTo(-playerScale,playerScale);
@@ -844,6 +862,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             powerUps.forEach(movementCursorLeft, this);
             endBlocks.forEach(movementCursorLeft, this);
             explosions.forEach(movementCursorLeft,this);
+            walkingenemies.forEach(movementCursorLeft,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementLeft();
             //playerSprite.scale.setTo(playerScale,playerScale);
@@ -868,6 +887,18 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
         }
         
     }  
+}
+
+function chasePlayer(element){
+    if(element.body.y - player.body.y <=150){
+        if(player.body.x-element.body.x >0){
+            element.body.x += crawlSpeed;
+        }
+        else{
+            element.body.x -= crawlSpeed;
+        }
+    }
+    element.body.velocity.y += 5;
 }
 
 function displayExplosion(trap) {
@@ -972,6 +1003,7 @@ function clearLevel()
     trapShow.removeAll(true);
     endBlocks.removeAll(true);
     powerUps.removeAll(true);
+    walkingenemies.removeAll(true);
 
     //Borrar elementos de UI
     lifeBar.destroy();
@@ -989,7 +1021,6 @@ function nextLevel()
     //de start si ya ha acabado el juego
     clearLevel();
     currentLevel++;
-    console.log(currentLevel);
 
     if(currentLevel>levelsData.length)
     {
