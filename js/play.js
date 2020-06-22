@@ -1052,6 +1052,7 @@ function clearLevel()
     endBlocks.removeAll(true);
     powerUps.removeAll(true);
     walkingenemies.removeAll(true);
+    capPowerUp.removeAll(true);
 
     //Borrar elementos de UI
     lifeBar.destroy();
