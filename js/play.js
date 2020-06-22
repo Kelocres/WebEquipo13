@@ -39,10 +39,11 @@ let trapShow;
 //POWER UPS
 let powerUps;
 let powerUpsAppearing;
-let powerUp1Actived;
-let powerUpAccelerateActive = true;
+let powerUpAccelerateActive;
+let  = false;
 const powerAcceleration = 1.5;
 let powerUp3Actived;
+const speedthreshold = 0.01;
 
 // END OF LEVEL BLOCKS
 let endBlocks;
@@ -53,7 +54,8 @@ let worldMargin;
 let player;
 let playerLife;
 //let playerVelocity = 4;
-let playerAcceleration = 2;
+const playerStandardSpeed = 2;
+let playerAcceleration = playerStandardSpeed;
 let playerName ="RandomMonster";
 let playerSprite;
 let playerScale = 0.14;
@@ -111,7 +113,12 @@ let enemyAppearing = 10;
 const crawlSpeed = 0.8;
 let allowMovingObstacles;
 
+//cap trap
 let allowMegaPowerUps;
+let capPowerUp;
+let capPowerUpActive = false;
+const capPowerAcceleration = 3;
+const capPwerUpRate = 50;
 
 let levelConfig;
 
@@ -306,7 +313,6 @@ function createPlay(){
         game.input.keyboard.addCallbacks(this, null, null, teclaPulsada);
         //console.log("Hay bloques");
     }
-
 }
 
 function updatePlay(){
@@ -317,6 +323,7 @@ function updatePlay(){
     game.physics.arcade.collide(player, blocks,playerHitsBlock,null,this);//.anchor para cambiar la animación
     game.physics.arcade.overlap(player, traps, playerHitsTrap, null, this);
     game.physics.arcade.collide(player, trapShow, playerHitsTrapShow, null, this);
+    game.physics.arcade.collide(player, capPowerUp, playerHitsCapPowerUp, null, this);
     game.physics.arcade.collide(player, walkingenemies, playerHitsTrap, null, this);
     game.physics.arcade.collide(player, powerUps, playerHitspowerUp, null, this);
     game.physics.arcade.collide(player, endBlocks, playerHitsEndBlocks, null, this);
@@ -334,6 +341,14 @@ function updatePlay(){
 
     //if (background.y< 1536 && background.y>= backgoundBaseY-10) 
     background.y = backgoundBaseY + game.camera.y * backgroundMoveFactorY;
+
+    if(player.body.velocity.y <= speedthreshold){
+        capPowerUpActive = false;
+        powerUpAccelerateActive = false;
+    }
+    if(capPowerUpActive || powerUpAccelerateActive){
+        playerAcceleration = playerStandardSpeed;
+    }
 }
 
 function createPlayer(){
@@ -434,6 +449,13 @@ function setupExplosion(explosion){
     explosion.animations.add('explosion');
 }
 
+function playerHitsCapPowerUp(player, power){
+    power.destroy();
+    playerAcceleration *= capPowerAcceleration;
+    capPowerUpActive = true;
+    
+    game.time.events.add(Phaser.Timer.SECOND * 4, function(){playerAcceleration = playerStandardSpeed; capPowerUpActive = false}, this);
+}
 
 function actualizarVida(){
     lifeBar.scale.setTo(lifeBarRatio * playerLife/100, 1.2);
@@ -474,6 +496,12 @@ function createBlock(){
     powerUps.enableBody = true;
     game.physics.arcade.enable(powerUps);
     powerUps.createMultiple(numPlatforms, 'cristal');
+
+    //The group of cap powerups
+    capPowerUp = game.add.group();
+    capPowerUp.enableBody = true;
+    game.physics.arcade.enable(capPowerUp);
+    capPowerUp.createMultiple(numPlatforms, 'camerica');
 
     //The blocks of at the end of the level
     endBlocks = game.add.group();
@@ -582,18 +610,30 @@ function setUpBlock(currentBlock, hole)
             //Will a power up appear here?
             else if(Math.floor(Math.random()* 100) <= powerUpsAppearing)
             {
-                if(currentLevel >= 2){
-
+                if(allowMegaPowerUps && Math.floor(Math.random()* 100) <= capPwerUpRate){
+                    let itemPower = capPowerUp.getFirstExists(false);
+                    if(itemPower)
+                    {
+                        itemPower.reset(blockX, blockY-5);
+                        itemPower.scale.setTo(0.18, 0.18);
+                        itemPower.body.checkCollision.left = true;
+                        itemPower.body.checkCollision.up = true;
+                        itemPower.body.checkCollision.right = true;
+                        itemPower.body.immovable =true;
+                    }
                 }
-                let itemPower = powerUps.getFirstExists(false);
-                if(itemPower)
-                {
-                    itemPower.reset(blockX+17, blockY);
-                    itemPower.body.checkCollision.left = true;
-                    itemPower.body.checkCollision.up = true;
-                    itemPower.body.checkCollision.right = true;
-                    itemPower.body.immovable =true;
+                else{
+                    let itemPower = powerUps.getFirstExists(false);
+                    if(itemPower)
+                    {
+                        itemPower.reset(blockX+17, blockY);
+                        itemPower.body.checkCollision.left = true;
+                        itemPower.body.checkCollision.up = true;
+                        itemPower.body.checkCollision.right = true;
+                        itemPower.body.immovable =true;
+                    }
                 }
+                
             }
         }
 
@@ -691,7 +731,6 @@ function walkStop(walk){
 
 function playerHitsBlock(player, block){
     
-    powerUpAccelerateActive = false;
     //Que tanto en personaje como los bloques tengan colliders muy finos podrian solucionar el problema de que rebote si da en un lado del bloque
     if(block.body.touching.up == true){
 
@@ -761,7 +800,6 @@ function playerHitsEndBlocks(player, endBlock)
 
 function playerHitsLB(player, letterBlock)
 {
-    powerUpAccelerateActive = false;
     if(letterBlock.body.touching.up == true)
     {
         
@@ -779,12 +817,18 @@ function playerHitsLB(player, letterBlock)
 
 function playerHitsTrap(player, trap)
 {
-    powerUpAccelerateActive = false;
-    displayExplosion(trap);
-    trap.destroy();
-    playerLife -= trapDamage* player.body.velocity.y;
-    player.body.velocity.y =BOUNCE_CONSTANT;
-    actualizarVida();
+    if(capPowerUpActive){
+        capPowerUpActive = false;
+        displayExplosion(trap);
+        trap.destroy();
+    }
+    else{
+        displayExplosion(trap);
+        trap.destroy();
+        playerLife -= trapDamage* player.body.velocity.y;
+        player.body.velocity.y =BOUNCE_CONSTANT;
+        actualizarVida();
+    }
     
 }
 
@@ -798,7 +842,7 @@ function playerHitspowerUp(player, powerUp){
     playerAcceleration *= powerAcceleration;
     powerUpAccelerateActive = true;
 
-    game.time.events.add(Phaser.Timer.SECOND * 4, function(){playerAcceleration = 2; powerUpAccelerateActive = false}, this);
+    game.time.events.add(Phaser.Timer.SECOND * 4, function(){playerAcceleration = playerStandardSpeed; powerUpAccelerateActive = false}, this);
     //var timedEvent = this.time.delayedCall(3000, function(){playerAcceleration = 2; powerUpAccelerateActive = false}, [], this);
     //var timedEvent = this.time.addEvent({ delay: 500, callback: function(){playerAcceleration = 2; powerUpAccelerateActive = false}, callbackScope: this, loop: true });
 }
@@ -850,6 +894,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             endBlocks.forEach(movementCursorRight, this);
             explosions.forEach(movementCursorRight,this);
             walkingenemies.forEach(movementCursorRight,this);
+            capPowerUp.forEach(movementCursorRight,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementRight();
             //playerSprite.scale.setTo(-playerScale,playerScale);
@@ -863,6 +908,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             endBlocks.forEach(movementCursorLeft, this);
             explosions.forEach(movementCursorLeft,this);
             walkingenemies.forEach(movementCursorLeft,this);
+            capPowerUp.forEach(movementCursorLeft,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementLeft();
             //playerSprite.scale.setTo(playerScale,playerScale);
@@ -878,6 +924,8 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             powerUps.forEach(movementMouse, this);
             endBlocks.forEach(movementMouse, this);
             explosions.forEach(movementMouse,this);
+            walkingenemies.forEach(movementMouse,this);
+            capPowerUp.forEach(movementMouse,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementMouse();
             //playerSprite.scale.setTo(-playerScale,playerScale);
