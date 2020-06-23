@@ -43,11 +43,11 @@ let powerUpAccelerateActive;
 let  = false;
 const powerAcceleration = 1.5;
 let powerUp3Actived;
-const speedthreshold = 0.01;
+const speedthreshold = 0.03;
 
 // END OF LEVEL BLOCKS
 let endBlocks;
-
+let gameEnded = false;
 let worldMargin;
 
 //Player
@@ -125,7 +125,7 @@ let fallIn;
 let fallOut;
 const probTpAppear = 0.02;
 
-//mine turtle
+//mine turtle en realidad es una spaceship
 let mineTurtles;
 let allowMineTurlte;
 
@@ -237,7 +237,7 @@ function preloadPlay(){
     game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_28.png');
     game.load.image('meta', 'assets/imgs/New enviroment/meta.png');
     game.load.image('camerica', 'assets/imgs/camerica.png');
-    game.load.image('hello', 'assets/imgs/hello.png');
+    game.load.image('hello', 'assets/imgs/spaceship.png');
     
     game.load.image('fallInTo', 'assets/imgs/mina/mine3_on.png');
     game.load.image('fallOutOf', 'assets/imgs/mina/mine3_off.png');
@@ -294,6 +294,7 @@ function preloadPlay(){
 
 function createPlay(){
 
+    gameEnded = false;
     console.log("Cargar nivel "+ currentLevel);
 
     levelConfig = JSON.parse(game.cache.getText('level'));
@@ -329,6 +330,9 @@ function createPlay(){
         game.input.keyboard.addCallbacks(this, null, null, teclaPulsada);
         //console.log("Hay bloques");
     }
+
+    
+
 }
 
 function updatePlay(){
@@ -349,7 +353,7 @@ function updatePlay(){
     game.physics.arcade.collide(player, endBlocks, playerHitsFallInto, null, this);
     
     walkingenemies.forEach(chasePlayer, this);
-    mineTurtles.forEach(chasePlayer, this);
+    mineTurtles.forEach(justWander, this);
 
     for(let i=0; i<groupLetterBlocks.length; i++)
         if(groupLetterBlocks[i].solid == true)
@@ -362,7 +366,7 @@ function updatePlay(){
     //if (background.y< 1536 && background.y>= backgoundBaseY-10) 
     background.y = backgoundBaseY + game.camera.y * backgroundMoveFactorY;
 
-    if(player.enable && player.body.velocity.y <= speedthreshold){
+    if(!gameEnded && player.body.velocity.y <= speedthreshold){
         capPowerUpActive = false;
         powerUpAccelerateActive = false;
     }
@@ -718,21 +722,22 @@ function setUpBlock(currentBlock, hole)
                     imgTrap.scale.setTo(0.3,0.3);
                 }
             }
-            else if(allowMovingObstacles && Math.floor(Math.random()* 100 <= enemyAppearing)){//aparecera un walking enemy?
-                if(allowMineTurlte && Math.floor(Math.random()* 100 <= 50)){
+            else if(Math.floor(Math.random()* 100 <= enemyAppearing)){//aparecera un walking enemy?
+                if(allowMineTurlte && Math.floor(Math.random()* 100 <= 100)){
                     let wEnemy = mineTurtles.getFirstExists(false);
                     if(wEnemy)
                     {
-                        wEnemy.reset(blockX, blockY-120);
+                        wEnemy.reset(blockX, blockY-70);
                         wEnemy.scale.setTo(0.15,0.15);
                         wEnemy.body.checkCollision.left = true;
                         wEnemy.body.checkCollision.up = true;
                         wEnemy.body.checkCollision.right = true;
                         wEnemy.body.checkCollision.down = true;
-                        wEnemy.body.velocity.y = 20;
+                        wEnemy.body.velocity.x = 50;
+                       
                     }
                 }
-                else{
+                else if(allowMovingObstacles){
 
                     let wEnemy = walkingenemies.getFirstExists(false);
                     if(wEnemy)
@@ -891,6 +896,12 @@ function playerHitsTrap(player, trap)
     
 }
 
+function justWander(turtle){
+    if(Math.random() * 100 <= 0.1){
+        turtle.body.velocity.x *=-1;
+    }
+
+}
 function playerHitsTrapShow(player, trap){
     game.add.tween(trap).to( { alpha: 0 }, 150, "Linear", true);
 
@@ -1135,6 +1146,7 @@ function clearLevel()
 
 function nextLevel()
 {
+    gameEnded = true;
     //El jugador va a pasar al siguiente nivel o vuelve a la pantalla 
     //de start si ya ha acabado el juego
     clearLevel();
