@@ -113,7 +113,6 @@ let enemyAppearing = 10;
 const crawlSpeed = 0.8;
 let allowMovingObstacles;
 
-let enemAnimation;
 
 //cap trap
 let allowMegaPowerUps;
@@ -279,23 +278,7 @@ function preloadPlay(){
     //game.load.text("level",levelsData[1], true);
 
     // load moving obstacle anim
-    game.load.image('mo0',"assets/imgs/Bicho que anda/run/mo.png", 2112, 1372, 16);
-    game.load.image('mo1',"assets/imgs/Bicho que anda/run/alien_9-run1.png");
-    game.load.image('mo2',"assets/imgs/Bicho que anda/run/alien_9-run2.png");
-    game.load.image('mo3',"assets/imgs/Bicho que anda/run/alien_9-run3.png");
-    game.load.image('mo4',"assets/imgs/Bicho que anda/run/alien_9-run4.png");
-    game.load.image('mo5',"assets/imgs/Bicho que anda/run/alien_9-run5.png");
-    game.load.image('mo6',"assets/imgs/Bicho que anda/run/alien_9-run6.png");
-    game.load.image('mo7',"assets/imgs/Bicho que anda/run/alien_9-run7.png");
-    game.load.image('mo8',"assets/imgs/Bicho que anda/run/alien_9-run8.png");
-    game.load.image('mo9',"assets/imgs/Bicho que anda/run/alien_9-run9.png");
-    game.load.image('mo10',"assets/imgs/Bicho que anda/run/alien_9-run10.png");
-    game.load.image('mo11',"assets/imgs/Bicho que anda/run/alien_9-run11.png");
-    game.load.image('mo12',"assets/imgs/Bicho que anda/run/alien_9-run12.png");
-    game.load.image('mo13',"assets/imgs/Bicho que anda/run/alien_9-run13.png");
-    game.load.image('mo14',"assets/imgs/Bicho que anda/run/alien_9-run14.png");
-    game.load.image('mo015',"assets/imgs/Bicho que anda/run/alien_9-run15.png");
-    game.load.image('mo016',"assets/imgs/Bicho que anda/run/alien_9-run16.png");
+    game.load.spritesheet('mo0',"assets/imgs/Bicho que anda/run/mo.png", 1056, 636, 16);
 
 
 }
@@ -558,8 +541,7 @@ function createBlock(){
     walkingenemies = game.add.group();
     walkingenemies.enableBody = true;
     game.physics.arcade.enable(walkingenemies);
-    walkingenemies.createMultiple(numEnemies, 'mo0');
-    walkingenemies.frame = 1;
+    walkingenemies.createMultiple(numEnemies, 'mo0').frame = 1;
 
     mineTurtles = game.add.group();
     mineTurtles.enableBody = true;
@@ -782,9 +764,9 @@ function setUpBlock(currentBlock, hole)
                     let wEnemy = walkingenemies.getFirstExists(false);
                     if(wEnemy)
                     {
+
                         wEnemy.reset(blockX, blockY-70);
-                        wEnemy.frame = 2;
-                        wEnemy.scale.setTo(0.10,0.10);
+                        wEnemy.scale.setTo(0.05,0.05);
                         wEnemy.body.bounce.setTo(0,0.2);
                         wEnemy.body.checkCollision.left = true;
                         wEnemy.body.checkCollision.up = true;
