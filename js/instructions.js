@@ -19,10 +19,16 @@ function muestraPantalla() {
     background.scale.setTo(0.6,0.6);
     btnBack = game.add.button(10,10,'botonback', onBackButtonPressed);
     
-    let credits = 'The objetive of the game is\n to fall evading all the obstacles\n and getting to the bottom the fastest you can';
+    let credits = 'The objetive of the game is\n to fall evading all the \n obstacles and getting to the \n bottom the fastest you can. \n';
+    let append = '\n In order to acomplish this \n the player will be able \n to move the character \n with the arrows and \n the mouse.\n'
+    let append2 = ' \nEvade all the enemies and \n prevent yourself from\n crashing into the ground.\n'
+    let append3 = '\n Press the letter in the blocks \n to vanish them and \ncontinue falling.'
+    credits += append;
+    credits += append2;
+    credits += append3;
 
     game.add.text(25, game.world.height / 6, credits, {
-        font: 'bold 26pt FerrumExtracondensed',
+        font: 'bold 20pt FerrumExtracondensed',
         fill: '#b60404'
     });
 }
