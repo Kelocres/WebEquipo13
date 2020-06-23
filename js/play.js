@@ -123,11 +123,16 @@ const capPwerUpRate = 50;
 //Fall in and fall out
 let fallIn;
 let fallOut;
-const probTpAppear = 0.02;
-
+const probTpAppear = 20;
+let allowTp;
+let posFallOut = 0;
+let tpNow = false;
+let fallOutArray = [];
+let platformNum = 0;
 //mine turtle en realidad es una spaceship
 let mineTurtles;
 let allowMineTurlte;
+const probTurtle = 20;
 
 
 
@@ -240,7 +245,7 @@ function preloadPlay(){
     game.load.image('hello', 'assets/imgs/spaceship.png');
     
     game.load.image('fallInTo', 'assets/imgs/mina/mine3_on.png');
-    game.load.image('fallOutOf', 'assets/imgs/mina/mine3_off.png');
+    game.load.image('fallOutOf', 'assets/imgs/mina/mine3_off_rotated.png');
 
     //BackGrounds
     game.load.image('BG_alien_3','assets/imgs/New enviroment/BackGrounds/BG alien 3.jpg');
@@ -303,6 +308,7 @@ function createPlay(){
     allowMovingObstacles =levelConfig.movingObstacles;
     levelsNumber = levelConfig.levelNumber;
     allowMineTurlte = levelConfig.allowMineTurlte;
+    allowTp = levelConfig.allowTp;
     createPlayer();
     createCameraBounds();
     createKeyControls();
@@ -350,7 +356,7 @@ function updatePlay(){
     game.physics.arcade.collide(player, endBlocks, playerHitsEndBlocks, null, this);
     game.physics.arcade.overlap(walkingenemies, blocks, function(mine){ mine.body.velocity.y = 0; mine.body.y-=1}, null, this);
     game.physics.arcade.overlap(mineTurtles, blocks, function(mine){ mine.body.velocity.y = 0; mine.body.y-=1}, null, this);
-    game.physics.arcade.collide(player, endBlocks, playerHitsFallInto, null, this);
+    game.physics.arcade.overlap(player, fallIn, playerHitsFallInto, null, this);
     
     walkingenemies.forEach(chasePlayer, this);
     mineTurtles.forEach(justWander, this);
@@ -525,14 +531,14 @@ function createBlock(){
     fallIn = game.add.group();
     fallIn.enableBody = true;
     game.physics.arcade.enable(fallIn);
-    fallIn.createMultiple(numBlocks, 'fallInTo');
+    fallIn.createMultiple(numPlatforms, 'fallInTo');
     fallIn.callAll('anchor.setTo','anchor',0, 1.0);
 
     //Fall Out
     fallOut = game.add.group();
     fallOut.enableBody = true;
     game.physics.arcade.enable(fallOut);
-    fallOut.createMultiple(numBlocks, 'fallOutOf');
+    fallOut.createMultiple(numPlatforms, 'fallOutOf');
     fallOut.callAll('anchor.setTo','anchor',0, 1.0);
 
     //The group of cap powerups
@@ -573,12 +579,17 @@ function createBlock(){
     //For each platform
     for(var i = 0; i< numPlatforms; i++)
     {
+        platformNum = i;
         blockY += levelConfig.platforms[i].distance;
         hole = levelConfig.platforms[i].hole;
         blockX = firstBlockX;
         trapAppearing += incrementTrapAppearing;
         letterBlockInPlatform = levelConfig.platforms[i].isThereLetter;
         //console.log("letterBlockInPlatform "+ letterBlockInPlatform);
+        if(i>2){
+            posFallOut+=levelConfig.platforms[i-3].distance;
+            tpNow = true;
+        }
 
         if(i!=numPlatforms-1)
             for(var j = 0; j < blocksPerPlatform; j++)
@@ -679,14 +690,6 @@ function setUpBlock(currentBlock, hole)
                 
             }
         }
-        //will appear a teleporter
-        else if(Math.floor(Math.random()* 100) <= probTpAppear*player.body.y){
-            let redTp = traps.getFirstExists(false);
-            if(redTp)
-            { 
-                
-            }
-        }
         //It's just another block
         else
         {
@@ -722,8 +725,43 @@ function setUpBlock(currentBlock, hole)
                     imgTrap.scale.setTo(0.3,0.3);
                 }
             }
+            
+            //will appear a teleporter
+            else if(allowTp && tpNow && Math.floor(Math.random()* 100) <= probTpAppear){
+                
+                let redTp = fallIn.getFirstExists(false);
+                if(redTp)
+                { 
+                    if(currentBlock == levelConfig.platforms[platformNum-3].hole && currentBlock+1 == hole){
+                        redTp.reset(blockX-90, blockY+20);
+                    }
+                    else{
+                        redTp.reset(blockX-10, blockY+20);
+                    }
+                    redTp.scale.setTo(.2,.15);
+                    redTp.body.checkCollision.left = false;
+                    redTp.body.checkCollision.up = true;
+                    redTp.body.checkCollision.right = false;
+                    redTp.body.immovable =true;
+                }
+                
+                let blueTp = fallOut.getFirstExists(false);
+                if(blueTp)
+                { 
+                    fallOutArray.push(blueTp);
+                    blueTp.anchor.setTo(0.5,0.5);
+                    if(currentBlock == levelConfig.platforms[platformNum-3].hole){
+                        blueTp.reset(blockX+120, posFallOut+50);
+                    }
+                    else{
+                        blueTp.reset(blockX+40, posFallOut+50);
+                    }
+                    blueTp.scale.setTo(.2,.15);
+                    blueTp.body.immovable =true;
+                }
+            }
             else if(Math.floor(Math.random()* 100 <= enemyAppearing)){//aparecera un walking enemy?
-                if(allowMineTurlte && Math.floor(Math.random()* 100 <= 100)){
+                if(allowMineTurlte && Math.floor(Math.random()* 100 <= probTurtle)){
                     let wEnemy = mineTurtles.getFirstExists(false);
                     if(wEnemy)
                     {
@@ -907,8 +945,27 @@ function playerHitsTrapShow(player, trap){
 
 }
 
-function playerHitsFallInto(player){
-    //player.body.x = fall
+function playerHitsFallInto(player, fallin){
+    let maAux = 0;
+    let falloutaux = fallOutArray[0];
+    while(maAux < fallOutArray.length && !(fallin.body.y - falloutaux.body.y > 600 && fallin.body.y - falloutaux.body.y < 1500)){
+        falloutaux = fallOutArray[maAux]
+        console.log(maAux)
+        while(!falloutaux && maAux < fallOutArray.length){
+            maAux++;
+        }
+        maAux++;
+    }
+
+    if(maAux >= fallOutArray.length){
+        displayExplosion(fallin);
+        fallin.destroy();
+    }
+    else{
+        player.body.y = falloutaux.body.y;
+    }
+    
+
 }
 
 function playerHitspowerUp(player, powerUp){
@@ -970,6 +1027,8 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             walkingenemies.forEach(movementCursorRight,this);
             capPowerUp.forEach(movementCursorRight,this);
             mineTurtles.forEach(movementCursorRight,this);
+            fallIn.forEach(movementCursorRight,this);
+            fallOut.forEach(movementCursorRight,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementRight();
             //playerSprite.scale.setTo(-playerScale,playerScale);
@@ -985,6 +1044,8 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             walkingenemies.forEach(movementCursorLeft,this);
             capPowerUp.forEach(movementCursorLeft,this);
             mineTurtles.forEach(movementCursorLeft,this);
+            fallIn.forEach(movementCursorLeft,this);
+            fallOut.forEach(movementCursorLeft,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementLeft();
             //playerSprite.scale.setTo(playerScale,playerScale);
@@ -1003,6 +1064,8 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             walkingenemies.forEach(movementMouse,this);
             mineTurtles.forEach(movementMouse,this);
             capPowerUp.forEach(movementMouse,this);
+            fallOut.forEach(movementMouse,this);
+            fallIn.forEach(movementMouse,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementMouse();
             //playerSprite.scale.setTo(-playerScale,playerScale);
@@ -1140,6 +1203,8 @@ function clearLevel()
     playerNameText.destroy();
     playerNameSpace.destroy();
 
+    tpNow = false;
+    posFallOut = 0;
     //Borrar jugador
     player.destroy();
 }

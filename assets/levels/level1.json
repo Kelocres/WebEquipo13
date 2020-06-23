@@ -30,5 +30,6 @@
     "letterBlocks" : false,
     "megaPowerUps" : false,
     "movingObstacles" : false,
-    "allowMineTurlte" : false
+    "allowMineTurlte" : false,
+    "allowTp": false
 }

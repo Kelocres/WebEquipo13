@@ -30,5 +30,6 @@
     "letterBlocks" : true,
     "megaPowerUps" : true,
     "movingObstacles" : true,
-    "allowMineTurlte" : true
+    "allowMineTurlte" : true,
+    "allowTp" : true
 }
