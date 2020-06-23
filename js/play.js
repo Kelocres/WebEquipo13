@@ -113,6 +113,8 @@ let enemyAppearing = 10;
 const crawlSpeed = 0.8;
 let allowMovingObstacles;
 
+let enemAnimation;
+
 //cap trap
 let allowMegaPowerUps;
 let capPowerUp;
@@ -129,6 +131,7 @@ let posFallOut = 0;
 let tpNow = false;
 let fallOutArray = [];
 let platformNum = 0;
+
 //mine turtle en realidad es una spaceship
 let mineTurtles;
 let allowMineTurlte;
@@ -276,7 +279,7 @@ function preloadPlay(){
     //game.load.text("level",levelsData[1], true);
 
     // load moving obstacle anim
-    game.load.image('mo0',"assets/imgs/Bicho que anda/run/alien_9-run0.png");
+    game.load.image('mo0',"assets/imgs/Bicho que anda/run/mo.png", 2112, 1372, 16);
     game.load.image('mo1',"assets/imgs/Bicho que anda/run/alien_9-run1.png");
     game.load.image('mo2',"assets/imgs/Bicho que anda/run/alien_9-run2.png");
     game.load.image('mo3',"assets/imgs/Bicho que anda/run/alien_9-run3.png");
@@ -337,8 +340,6 @@ function createPlay(){
         //console.log("Hay bloques");
     }
 
-    
-
 }
 
 function updatePlay(){
@@ -354,7 +355,7 @@ function updatePlay(){
     game.physics.arcade.collide(player, mineTurtles, playerHitsTrap, null, this);
     game.physics.arcade.collide(player, powerUps, playerHitspowerUp, null, this);
     game.physics.arcade.collide(player, endBlocks, playerHitsEndBlocks, null, this);
-    game.physics.arcade.overlap(walkingenemies, blocks, function(mine){ mine.body.velocity.y = 0; mine.body.y-=1}, null, this);
+    game.physics.arcade.overlap(walkingenemies, blocks, keeptheenemontheplat, null, this);
     game.physics.arcade.overlap(mineTurtles, blocks, function(mine){ mine.body.velocity.y = 0; mine.body.y-=1}, null, this);
     game.physics.arcade.overlap(player, fallIn, playerHitsFallInto, null, this);
     
@@ -557,7 +558,8 @@ function createBlock(){
     walkingenemies = game.add.group();
     walkingenemies.enableBody = true;
     game.physics.arcade.enable(walkingenemies);
-    walkingenemies.createMultiple(numEnemies, 'cristal');
+    walkingenemies.createMultiple(numEnemies, 'mo0');
+    walkingenemies.frame = 1;
 
     mineTurtles = game.add.group();
     mineTurtles.enableBody = true;
@@ -760,7 +762,7 @@ function setUpBlock(currentBlock, hole)
                     blueTp.body.immovable =true;
                 }
             }
-            else if(Math.floor(Math.random()* 100 <= enemyAppearing)){//aparecera un walking enemy?
+            else if(Math.floor(Math.random()* 100 <= 100)){//enemyAppearing)){//aparecera un walking enemy?
                 if(allowMineTurlte && Math.floor(Math.random()* 100 <= probTurtle)){
                     let wEnemy = mineTurtles.getFirstExists(false);
                     if(wEnemy)
@@ -775,18 +777,21 @@ function setUpBlock(currentBlock, hole)
                        
                     }
                 }
-                else if(allowMovingObstacles){
+                else /*if(allowMovingObstacles)*/{
 
                     let wEnemy = walkingenemies.getFirstExists(false);
                     if(wEnemy)
                     {
                         wEnemy.reset(blockX, blockY-70);
+                        wEnemy.frame = 2;
+                        wEnemy.scale.setTo(0.10,0.10);
                         wEnemy.body.bounce.setTo(0,0.2);
                         wEnemy.body.checkCollision.left = true;
                         wEnemy.body.checkCollision.up = true;
                         wEnemy.body.checkCollision.right = true;
                         wEnemy.body.checkCollision.down = true;
                         wEnemy.body.velocity.y = 20;
+                        addAnim(wEnemy);
                     }
                 }
             }
@@ -796,6 +801,9 @@ function setUpBlock(currentBlock, hole)
 
 }
 
+function addAnim(enemy){
+    enemy.animations.add('mo');
+}
 function setUpEndBlock()
 {
     let item = endBlocks.getFirstExists(false);
@@ -968,6 +976,12 @@ function playerHitsFallInto(player, fallin){
 
 }
 
+function keeptheenemontheplat(enem, plat){
+    if(enem.body.touching.down){
+        enem.body.velocity.y = 0; 
+        enem.body.y-=1;
+    }
+}
 function playerHitspowerUp(player, powerUp){
     powerUp.destroy();
     playerAcceleration *= powerAcceleration;
@@ -1078,7 +1092,8 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
 }
 
 function chasePlayer(element){
-    if(element.body.y - player.body.y <=150){
+    if(element.body.touching.down && element.body.y - player.body.y <=200){
+        element.animations.play('mo', true);
         if(player.body.x-element.body.x >0){
             element.body.x += crawlSpeed;
         }
@@ -1086,7 +1101,7 @@ function chasePlayer(element){
             element.body.x -= crawlSpeed;
         }
     }
-    element.body.velocity.y  += 10;
+    element.body.velocity.y  += 100;
 }
 
 function displayExplosion(trap) {
