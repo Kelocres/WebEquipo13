@@ -7,7 +7,7 @@ let authors;
 let btnBack;
 
 function loadAboutAssets() {
-    game.load.image('botonback', 'assets/imgs/back.png');
+    game.load.image('botonback', 'assets/imgs/New UI/PNG/Buttons/Back.png');
     game.load.image("background", "assets/imgs/New enviroment/BackGrounds/BG space 2.jpg")
 }
 
