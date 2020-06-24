@@ -13,6 +13,7 @@ function startGame() {
     game.state.add('about', aboutState);
     game.state.add('endgame', endState);
     game.state.add('instrucions', instructionsState);
+    game.state.add('select_level', selectLevelState);
 
     game.state.start('start');
 }

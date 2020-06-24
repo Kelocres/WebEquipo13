@@ -18,7 +18,7 @@ let currentLevel = 1;
 
 function cargaAssets() 
 {
-    game.load.image('botonSelectName','assets/imgs/Select_Name.png');
+    game.load.image('botonSelectName','assets/imgs/New UI/PNG/Buttons/Select_Name.png');
     game.load.image('botonabout','assets/imgs/New UI/PNG/Buttons/About.png');
     game.load.image('botoninst','assets/imgs/New UI/PNG/Buttons/Instructions.png');
     game.load.image('botonSelectLevel','assets/imgs/New UI/PNG/Buttons/Select_Level.png');
@@ -42,7 +42,7 @@ function muestraPantalla()
     detector_text.scale.setTo(0.7,0.7);
 
 
-    btnSelectLevel = game.add.button(39, 250, 'botonSelectLevel', selectNamePressed);
+    btnSelectLevel = game.add.button(39, 250, 'botonSelectLevel', selectLevelPressed);
     btnSelectName = game.add.button(39, 375, 'botonSelectName', selectNamePressed);
     btnAbout = game.add.button(39, 500, 'botonabout', aboutPressed);
     btnInstrucions = game.add.button(39, 625, 'botoninst', instPressed);
@@ -50,6 +50,6 @@ function muestraPantalla()
 
 // MÉTODOS DE LOS BOTONES --------------------------
 function aboutPressed()     {game.state.start('about');}
-function selectLevelPressed()   {game.state.start('play');}
+function selectLevelPressed()   {game.state.start('select_level');}
 function selectNamePressed()      {game.state.start('writeName');}
 function instPressed()      {game.state.start('instrucions');}

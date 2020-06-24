@@ -27,7 +27,7 @@ function preloadWN()
 {
     game.load.image('backImage','assets/imgs/New enviroment/BackGrounds/Background.png');
     game.load.image('botonplay','assets/imgs/botonPlay.png');
-    game.load.image('boton','assets/imgs/boton.png');
+    game.load.image('boton','assets/imgs/New UI/PNG/Pause/Table.png');
 }
 
 function createWN()
@@ -48,22 +48,22 @@ function createWN()
     //Botoncitos de nombres
     let alturasbotones = [100, 200, 300];
     //Nombres predifinidos
-    
+    let desplazamientoAdicionalTexto = 22;
 
    //Botón de nombre 1
-    botonNombre1 = game.add.button(30, alturasbotones[0], 'boton', escribirPredefinido1);
-    botonNombre1.scale.setTo(1.3,1);
-    textoNombre1 = game.add.text(40, alturasbotones[0], predefinidos[0], style);
+    botonNombre1 = game.add.button(20, alturasbotones[0], 'boton', escribirPredefinido1);
+    //botonNombre1.scale.setTo(1.3,1);
+    textoNombre1 = game.add.text(50, alturasbotones[0]+desplazamientoAdicionalTexto, predefinidos[0], style);
 
     //Botón de nombre 2
-    botonNombre2 = game.add.button(30, alturasbotones[1], 'boton', escribirPredefinido2);
-    botonNombre2.scale.setTo(1.3,1);
-    textoNombre2 = game.add.text(40, alturasbotones[1], predefinidos[1], style);
+    botonNombre2 = game.add.button(20, alturasbotones[1], 'boton', escribirPredefinido2);
+    //botonNombre2.scale.setTo(1.3,1);
+    textoNombre2 = game.add.text(50, alturasbotones[1]+desplazamientoAdicionalTexto, predefinidos[1], style);
 
     //Botón de nombre 3
-    botonNombre3 = game.add.button(30, alturasbotones[2], 'boton', escribirPredefinido3);
-    botonNombre3.scale.setTo(1.3,1);
-    textoNombre3 = game.add.text(40, alturasbotones[2], predefinidos[2], style);
+    botonNombre3 = game.add.button(20, alturasbotones[2], 'boton', escribirPredefinido3);
+    //botonNombre3.scale.setTo(1.3,1);
+    textoNombre3 = game.add.text(50, alturasbotones[2]+desplazamientoAdicionalTexto, predefinidos[2], style);
 
     btnGoToPlay = game.add.button(100, 700, 'botonplay', startPlay);
 
