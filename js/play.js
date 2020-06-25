@@ -110,7 +110,7 @@ let rocksEmitter;
 let walkingenemies;
 let numEnemies = 20;
 let enemyAppearing = 10;
-const crawlSpeed = 0.8;
+const crawlSpeed = 30;
 let allowMovingObstacles;
 
 
@@ -744,13 +744,15 @@ function setUpBlock(currentBlock, hole)
                     blueTp.body.immovable =true;
                 }
             }
-            else if(Math.floor(Math.random()* 100 <= 100)){//enemyAppearing)){//aparecera un walking enemy?
+            else if(allowMovingObstacles && Math.floor(Math.random()* 100 <= enemyAppearing)){//aparecera un walking enemy?
                 if(allowMineTurlte && Math.floor(Math.random()* 100 <= probTurtle)){
                     let wEnemy = mineTurtles.getFirstExists(false);
                     if(wEnemy)
                     {
                         wEnemy.reset(blockX, blockY-70);
+                        wEnemy.anchor.setTo(.5);
                         wEnemy.scale.setTo(0.15,0.15);
+                        wEnemy.flipX = true;
                         wEnemy.body.checkCollision.left = true;
                         wEnemy.body.checkCollision.up = true;
                         wEnemy.body.checkCollision.right = true;
@@ -766,8 +768,8 @@ function setUpBlock(currentBlock, hole)
                     {
 
                         wEnemy.reset(blockX, blockY-70);
-                        wEnemy.scale.setTo(0.05,0.05);
-                        wEnemy.body.bounce.setTo(0,0.2);
+                        wEnemy.anchor.setTo(.5);
+                        wEnemy.scale.setTo(0.1,0.1);
                         wEnemy.body.checkCollision.left = true;
                         wEnemy.body.checkCollision.up = true;
                         wEnemy.body.checkCollision.right = true;
@@ -959,11 +961,19 @@ function playerHitsFallInto(player, fallin){
 }
 
 function keeptheenemontheplat(enem, plat){
-    if(enem.body.touching.down){
+    if(!plat.body.touching.down && !enem.body.touching.up){
         enem.body.velocity.y = 0; 
         enem.body.y-=1;
     }
+    else{
+        enem.body.velocity.y += 100;
+    }
+
+    if(!enem.body.touching.left && !enem.body.touching.right){
+        enem.body.velocity.x = 0;
+    }
 }
+
 function playerHitspowerUp(player, powerUp){
     powerUp.destroy();
     playerAcceleration *= powerAcceleration;
@@ -1074,16 +1084,21 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
 }
 
 function chasePlayer(element){
-    if(element.body.touching.down && element.body.y - player.body.y <=200){
+    if(!(element.body.touching.left || element.body.touching.right) && element.body.y - player.body.y <=200){
         element.animations.play('mo', true);
-        if(player.body.x-element.body.x >0){
-            element.body.x += crawlSpeed;
+        if(player.body.x-element.body.x > 40){
+            element.body.velocity.x = crawlSpeed;
+            element.scale.setTo(-0.1,0.1);
         }
         else{
-            element.body.x -= crawlSpeed;
+            element.body.velocity.x = -crawlSpeed;
+            element.scale.setTo(0.1,0.1);
         }
     }
-    element.body.velocity.y  += 100;
+    else{
+        element.body.velocity.x = 0;
+    }
+    element.body.velocity.y  +=100;
 }
 
 function displayExplosion(trap) {
