@@ -56,7 +56,7 @@ let playerLife;
 //let playerVelocity = 4;
 const playerStandardSpeed = 2;
 let playerAcceleration = playerStandardSpeed;
-let playerName ="RandomMonster";
+//let playerName ="RandomMonster";
 let playerSprite;
 let playerScale = 0.14;
 const spriteDistance = 130;
@@ -141,88 +141,6 @@ const probTurtle = 20;
 let levelConfig;
 
 let levelsData = ['assets/levels/level1.json','assets/levels/level2.json'];
-
-class LetterBlock {
-    
-
-    constructor(sprite, assignedLetter)
-    {
-        this.sprite = sprite;
-        this.assignedLetter = assignedLetter;
-        this.solid = true; //Mientras sea true, el jugador colisiona con él
-    
-        this.disappearBlock = game.add.tween(this.sprite).to({
-            alpha: 0 //Se agranda al mismo tiempo que desaparece
-        }, 500, // Duración: medio segundo
-        Phaser.Easing.Linear.None, false, 0, 0, false);
-
-        this.disappearLetter = game.add.tween(this.assignedLetter).to({
-            alpha: 0 //Se agranda al mismo tiempo que desaparece
-        }, 1000, // Duración: medio segundo
-        Phaser.Easing.Linear.None, false, 0, 0, false);
-    }
-
-    verifyLetter(letter)
-    {
-        console.log("Comprobar "+this.assignedLetter.text+" con "+letter);
-
-        if(letter == this.assignedLetter.text)
-        {
-            this.solid = false;
-
-            this.disappearBlock.start();
-            this.disappearLetter.start();
-
-            /*disappear.onComplete.add(function(){
-                this.sprite.kill();
-            })*/
-        }
-    }
-
-    movementRight()
-    {
-        this.sprite.body.x -= BLOCK_SPEED;
-        this.assignedLetter.body.x -= BLOCK_SPEED;
-        if(this.sprite.body.x < -initBlockX)
-        {
-            this.sprite.body.x += worldMargin + 2*initBlockX; // += para ajustar su verdadera posicion en relacion con lo demas boques
-            this.assignedLetter.body.x += worldMargin + 2*initBlockX;
-        }
-    }
-
-    movementLeft()
-    {
-        this.sprite.body.x += BLOCK_SPEED;
-        this.assignedLetter.body.x += BLOCK_SPEED;
-        if(this.sprite.body.x > 400 + initBlockX)
-        {
-            let aux = worldMargin + initBlockX - this.sprite.body.x;
-            this.sprite.body.x = -initBlockX - aux;
-            this.assignedLetter.body.x = -initBlockX - aux;
-        }
-    }
-
-    movementMouse()
-    {
-        if(Math.abs(game.input.speed.x)<150)
-        {
-            this.sprite.body.x -= game.input.speed.x;
-            this.assignedLetter.body.x -= game.input.speed.x;
-            if(this.sprite.body.x < -initBlockX)
-            {
-                this.sprite.body.x += worldMargin + 2*initBlockX; // += para ajustar su verdadera posicion en relacion con lo demas boques
-                this.assignedLetter.body.x += worldMargin + 2*initBlockX;
-            }
-            if(this.sprite.body.x > 400 + initBlockX)
-            {
-                let aux = worldMargin + initBlockX - this.sprite.body.x;
-                this.sprite.body.x = -initBlockX - aux;
-                this.assignedLetter.body.x = -initBlockX - aux;
-            }
-        }
-    }
-
-}
 
 let playState = {
     preload: preloadPlay,
@@ -866,7 +784,7 @@ function playerHitsBlock(player, block){
 
         player.body.velocity.y =BOUNCE_CONSTANT;
         //Meter anim aquí
-        playerJumpAnimation.play('flex');
+        playerJumpAnimation.play();
         playerJumpling = true;
     }
     else if(block.body.touching.down == true)
@@ -1238,4 +1156,86 @@ function nextLevel()
         game.input.enabled = true;
         game.state.start('play');
     }
+}
+
+class LetterBlock {
+    
+
+    constructor(sprite, assignedLetter)
+    {
+        this.sprite = sprite;
+        this.assignedLetter = assignedLetter;
+        this.solid = true; //Mientras sea true, el jugador colisiona con él
+    
+        this.disappearBlock = game.add.tween(this.sprite).to({
+            alpha: 0 //Se agranda al mismo tiempo que desaparece
+        }, 500, // Duración: medio segundo
+        Phaser.Easing.Linear.None, false, 0, 0, false);
+
+        this.disappearLetter = game.add.tween(this.assignedLetter).to({
+            alpha: 0 //Se agranda al mismo tiempo que desaparece
+        }, 1000, // Duración: medio segundo
+        Phaser.Easing.Linear.None, false, 0, 0, false);
+    }
+
+    verifyLetter(letter)
+    {
+        console.log("Comprobar "+this.assignedLetter.text+" con "+letter);
+
+        if(letter == this.assignedLetter.text)
+        {
+            this.solid = false;
+
+            this.disappearBlock.start();
+            this.disappearLetter.start();
+
+            /*disappear.onComplete.add(function(){
+                this.sprite.kill();
+            })*/
+        }
+    }
+
+    movementRight()
+    {
+        this.sprite.body.x -= BLOCK_SPEED;
+        this.assignedLetter.body.x -= BLOCK_SPEED;
+        if(this.sprite.body.x < -initBlockX)
+        {
+            this.sprite.body.x += worldMargin + 2*initBlockX; // += para ajustar su verdadera posicion en relacion con lo demas boques
+            this.assignedLetter.body.x += worldMargin + 2*initBlockX;
+        }
+    }
+
+    movementLeft()
+    {
+        this.sprite.body.x += BLOCK_SPEED;
+        this.assignedLetter.body.x += BLOCK_SPEED;
+        if(this.sprite.body.x > 400 + initBlockX)
+        {
+            let aux = worldMargin + initBlockX - this.sprite.body.x;
+            this.sprite.body.x = -initBlockX - aux;
+            this.assignedLetter.body.x = -initBlockX - aux;
+        }
+    }
+
+    movementMouse()
+    {
+        if(Math.abs(game.input.speed.x)<150)
+        {
+            this.sprite.body.x -= game.input.speed.x;
+            this.assignedLetter.body.x -= game.input.speed.x;
+            if(this.sprite.body.x < -initBlockX)
+            {
+                this.sprite.body.x += worldMargin + 2*initBlockX; // += para ajustar su verdadera posicion en relacion con lo demas boques
+                this.assignedLetter.body.x += worldMargin + 2*initBlockX;
+            }
+            if(this.sprite.body.x > 400 + initBlockX)
+            {
+                let aux = worldMargin + initBlockX - this.sprite.body.x;
+                this.sprite.body.x = -initBlockX - aux;
+                this.assignedLetter.body.x = -initBlockX - aux;
+            }
+        }
+    }
+
 }

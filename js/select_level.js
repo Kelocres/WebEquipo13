@@ -38,29 +38,26 @@ function muestraPantalla()
     detector_text.scale.setTo(0.7,0.7);
 
 
-    btnLevel1 = game.add.button(39, 250, 'btnLevel1', playLevel(1));
-    btnLevel2 = game.add.button(39, 375, 'btnLevel2', playLevel(2));
-    btnLevel3 = game.add.button(39, 500, 'btnLevel3', playLevel(3));
+    btnLevel1 = game.add.button(39, 250, 'btnLevel1', playLevel1);
+    btnLevel2 = game.add.button(39, 375, 'btnLevel2', playLevel2);
+    btnLevel3 = game.add.button(39, 500, 'btnLevel3', playLevel3);
     btnBack = game.add.button(39, 625, 'btnBack', backPressed);
 }
 
 // MÉTODOS DE LOS BOTONES --------------------------
-function playLevel(level){
-    switch(level){
-        case 1:
-            //game.state.start('play');
-            console.log("Nivel 1");
-            break;
-        case 2:
-            //game.state.start('play');
-            console.log("Nivel 2");
-            break;
-        case 3:
-            //game.state.start('play');
-            console.log("Nivel 3");
-            break;
-    }
-    
-    //game.state.start('play');
+function playLevel1(){
+    console.log("Nivel 1");
+    currentLevel = 1;
+    game.state.start('play');
+}
+function playLevel2(){
+    console.log("Nivel 2");
+    currentLevel = 2;
+    game.state.start('play');
+}
+function playLevel3(){
+    console.log("Nivel 3");
+    currentLevel = 3;
+    game.state.start('play');
 }
 function backPressed(){game.state.start('start');}

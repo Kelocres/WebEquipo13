@@ -8,7 +8,7 @@ let key_backspace;
 let key_intro
 
 //Variable string
-var nombreJugador;
+var playerName;
 
 let botonNombre1, botonNombre2, botonNombre3;
 let textoNombre1, textoNombre2, textoNombre3;
@@ -26,7 +26,8 @@ let writeNameState = {
 function preloadWN()
 {
     game.load.image('backImage','assets/imgs/New enviroment/BackGrounds/Background.png');
-    game.load.image('botonplay','assets/imgs/botonPlay.png');
+    game.load.image('botonback', 'assets/imgs/New UI/PNG/Buttons/Back.png');
+    //game.load.image('botonplay','assets/imgs/botonPlay.png');
     game.load.image('boton','assets/imgs/New UI/PNG/Pause/Table.png');
 }
 
@@ -65,16 +66,16 @@ function createWN()
     //botonNombre3.scale.setTo(1.3,1);
     textoNombre3 = game.add.text(50, alturasbotones[2]+desplazamientoAdicionalTexto, predefinidos[2], style);
 
-    btnGoToPlay = game.add.button(100, 700, 'botonplay', startPlay);
+    btnGoToPlay = game.add.button(39, 650, 'botonback', startPlay);
 
     //Creación del mapa de bits
     bmd = game.make.bitmapData(400, 800);
     bmd.context.font = '64px Arial';
     bmd.context.fillStyle = '#ffffff';
-    bmd.context.fillText(nombreJugador, 64, 600);
+    bmd.context.fillText(playerName, 60, 562);
     bmd.addToWorld();
 
-    nombreJugador;
+    playerName;
 
     key_backspace = game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
     key_backspace.onDown.add(borrarLetra, this);
@@ -86,14 +87,14 @@ function createWN()
     game.input.keyboard.addCallbacks(this, null, null, keyPress);
 
     //startPlay()
-    if(nombreJugador!=null) changeName();
+    if(playerName!=null) changeName();
 }
 
 
 function borrarLetra()
 {
     //console.log("Borrar");
-    nombreJugador = nombreJugador.substring(0,nombreJugador.length-1);
+    playerName = playerName.substring(0,playerName.length-1);
     changeName();
 }
 
@@ -101,26 +102,26 @@ function borrarLetra()
 
 function escribirPredefinido1()
 {
-    nombreJugador = predefinidos[0];
+    playerName = predefinidos[0];
     changeName();
 }
 function escribirPredefinido2()
 {
-    nombreJugador = predefinidos[1];
+    playerName = predefinidos[1];
     changeName();
 }
 function escribirPredefinido3()
 {
-    nombreJugador = predefinidos[2];
+    playerName = predefinidos[2];
     changeName();
 }
     
 
 function keyPress(char)
 {
-    if(nombreJugador==null) nombreJugador = "";
+    if(playerName==null) playerName = "";
 
-    if(nombreJugador.length < 20) nombreJugador = nombreJugador + char;
+    if(playerName.length < 20) playerName = playerName + char;
     //nombreJugador = nombreJugador + String.fromCharCode(char);
 
     changeName();
@@ -133,17 +134,17 @@ function changeName()
         bmd.cls();
 
         //Cambiar tamaño fuente para los nombres largos
-        if(nombreJugador.length<7)           bmd.context.font = '64px Arial';
-        else if(nombreJugador.length<11)     bmd.context.font = '50px Arial';
-        else if(nombreJugador.length<15)     bmd.context.font = '40px Arial';
+        if(playerName.length<7)           bmd.context.font = '64px Arial';
+        else if(playerName.length<11)     bmd.context.font = '50px Arial';
+        else if(playerName.length<15)     bmd.context.font = '40px Arial';
         else                                 bmd.context.font = '35px Arial';
 
-        var x = 64;
+        var x = 60;
     
-        for(var i = 0; i < nombreJugador.length; i++)
+        for(var i = 0; i < playerName.length; i++)
         {
-            var letra = nombreJugador.charAt(i);
-            bmd.context.fillText(letra, x, 600);
+            var letra = playerName.charAt(i);
+            bmd.context.fillText(letra, x, 562);
     
             x += bmd.context.measureText(letra).width;
     
@@ -153,6 +154,6 @@ function changeName()
 
 function startPlay()
 {
-    currentLevel = 1;
-    if(nombreJugador!=null && nombreJugador!="") game.state.start('play');
+    //currentLevel = 1;
+    if(playerName!=null && playerName!="") game.state.start('start');
 }
