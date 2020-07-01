@@ -179,6 +179,10 @@ function preloadPlay(){
     //FX
     game.load.spritesheet('explosion','assets/imgs/Mina/Explosion_SpriteSheet.png',210,210,58);
     game.load.image('rock','assets/imgs/New enviroment/Tile_17.png')
+    game.load.image('pedacito1','assets/imgs/New Player/Pedacitos/Pedacito1');
+    game.load.image('pedacito2','assets/imgs/New Player/Pedacitos/Pedacito2');
+    game.load.image('pedacito3','assets/imgs/New Player/Pedacitos/Pedacito3');
+    game.load.image('pedacito4','assets/imgs/New Player/Pedacitos/Pedacito4');
 
     //UI
     game.load.image("containerLifeBar", "assets/imgs/New UI/PNG/Main_UI/Health_Bar_Table.png");
