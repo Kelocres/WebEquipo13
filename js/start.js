@@ -17,6 +17,10 @@ let textAnimationTime;
 let explosionAtStart;
 let currentLevel;
 
+//Estilo genérico
+var style = { font: "40px Arial", fill: "#ffffff", align: "left" };
+
+
 function cargaAssets() 
 {
     game.load.image('botonSelectName','assets/imgs/New UI/PNG/Buttons/Select_Name.png');

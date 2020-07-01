@@ -14,6 +14,7 @@ function startGame() {
     game.state.add('endgame', endState);
     game.state.add('instrucions', instructionsState);
     game.state.add('select_level', selectLevelState);
+    //game.state.add('endscreen', endscreenState);
 
     game.state.start('start');
 }

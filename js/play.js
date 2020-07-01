@@ -64,6 +64,7 @@ let playerFlexAnimation;
 let playerJumpAnimation;
 let playerFallAnimation;
 let playerJumpling;
+let defeated = false;
 
 //Background
 let background;
@@ -97,7 +98,7 @@ let RemainingPlatformsNumber;
 let PastPlatforms;
 let DistanceToNextPlatform;
 
-//Messages of winning or losing
+//Messages of winning or losing     (IGUAL ENTRAN O NO)
 let messWin;
 let messLose;
 
@@ -140,7 +141,7 @@ const probTurtle = 20;
 
 let levelConfig;
 
-let levelsData = ['assets/levels/level1.json','assets/levels/level2.json'];
+let levelsData = ['assets/levels/level1.json','assets/levels/level2.json', 'assets/levels/level3.json'];
 
 let playState = {
     preload: preloadPlay,
@@ -159,7 +160,8 @@ function preloadPlay(){
     game.load.image('bloque', 'assets/imgs/New enviroment/Tile_13.png');
     game.load.image('spikes', 'assets/imgs/mina/mine1_off_Resize.png');
     game.load.image('spikesCollider', 'assets/imgs/mina/mine1_off_ColliderResize.png');
-    game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_28.png');
+    //game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_28.png');
+    game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_LetterBlock.png');
     game.load.image('meta', 'assets/imgs/New enviroment/meta.png');
     game.load.image('camerica', 'assets/imgs/camerica.png');
     game.load.image('hello', 'assets/imgs/spaceship.png');
@@ -170,6 +172,7 @@ function preloadPlay(){
     //BackGrounds
     game.load.image('BG_alien_3','assets/imgs/New enviroment/BackGrounds/BG alien 3.jpg');
     game.load.image('BG_space_5','assets/imgs/New enviroment/BackGrounds/BG space 5.jpg');
+    game.load.image('BG_alien_1','assets/imgs/New enviroment/BackGrounds/BG alien 1.jpg');
 
     //Player
     //game.load.image('player','assets/imgs/New Player/jump/alien_4-jump0Fixed.png');
@@ -394,7 +397,10 @@ function playerHitsCapPowerUp(player, power){
 }
 
 function actualizarVida(){
-    lifeBar.scale.setTo(lifeBarRatio * playerLife/100, 1.2);
+    let valorActual = lifeBarRatio * playerLife/100;
+    lifeBar.scale.setTo(valorActual, 1.2);
+
+    if(valorActual <= 0) playerIsDead();
 }
 
 
@@ -554,8 +560,8 @@ function setUpBlock(currentBlock, hole)
                 //let letterForBlock = letterArray[Math.floor(Math.random()* letterArray.length)][1];
                 let letterForBlock = letterArray[Math.floor(Math.random()* letterArray.length)];
 
-                console.log(letterForBlock);
-                let letterText = game.add.text(blockX+40, blockY+40, letterForBlock, styleShowName);
+                //console.log(letterForBlock);
+                let letterText = game.add.text(blockX+40, blockY+20, letterForBlock, styleShowName);
                 game.physics.arcade.enable(letterText);
                 letterText.fontSize = 48;
                 letterText.anchor.setTo(0.5, 0.5);
@@ -1086,11 +1092,15 @@ function createKeyControls(){
 
 function playerIsDead()
 {
-    playerFallAnimation.play();
-    player.x = levelConfig.playerStart.x;
-    player.y = levelConfig.playerStart.y;
+    //playerFallAnimation.play();
+    //player.x = levelConfig.playerStart.x;
+    //player.y = levelConfig.playerStart.y;
 
     //Poner vida del jugador a tope y actualizar lifeBar
+    gameEnded = true;
+    defeated = true;
+    clearLevel();
+    game.state.start('endgame');
 }
 
 function resetInput()
@@ -1153,7 +1163,7 @@ function nextLevel()
 
     if(currentLevel>levelsData.length)
     {
-        game.state.start('start');
+        game.state.start('endgame');
     }
     else
     {

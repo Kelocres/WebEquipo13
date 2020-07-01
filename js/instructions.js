@@ -7,7 +7,8 @@ let instructionsState = {
     //update: updateNivel
 };
 
-
+//Estilo instrucciones
+var styleInst = { font: "25px Arial", fill: "#ffffff", align: "left" };
 
 function cargaAssets() {
     game.load.image('botonback', 'assets/imgs/New UI/PNG/Buttons/Back.png');
@@ -27,10 +28,7 @@ function muestraPantalla() {
     credits += append2;
     credits += append3;
 
-    game.add.text(25, game.world.height / 6, credits, {
-        font: 'bold 20pt FerrumExtracondensed',
-        fill: '#b60404'
-    });
+    game.add.text(25, game.world.height / 6, credits, styleInst);
 }
 
 

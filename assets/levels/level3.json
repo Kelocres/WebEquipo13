@@ -1,0 +1,35 @@
+{
+    "playerStart" : {"x": 200, "y": 30},
+    "blocksPerPlatform": 10,
+    "backgroundName": "BG_alien_1",
+    "levelNumber": 3,
+    "platforms":    
+    [
+        {"distance": 300, "isThereLetter": false, "hole":6},
+        {"distance": 250, "isThereLetter": false, "hole":4},
+        {"distance": 320, "isThereLetter": false, "hole":1},
+        {"distance": 350, "isThereLetter": false, "hole":2},
+        {"distance": 400, "isThereLetter": true, "hole":0},
+        {"distance": 340, "isThereLetter": true, "hole":4},
+        {"distance": 320, "isThereLetter": false, "hole":5},
+        {"distance": 360, "isThereLetter": false, "hole":6},
+        {"distance": 380, "isThereLetter": false, "hole":0},
+        {"distance": 340, "isThereLetter": false, "hole":2},
+        {"distance": 410, "isThereLetter": true, "hole":5},
+        {"distance": 350, "isThereLetter": false, "hole":3},
+        {"distance": 390, "isThereLetter": true, "hole":4},
+        {"distance": 410, "isThereLetter": false, "hole":2},
+        {"distance": 370, "isThereLetter": false, "hole":0},
+        {"distance": 340, "isThereLetter": false, "hole":5},
+        {"distance": 350, "isThereLetter": false, "hole":4},
+        {"distance": 310, "isThereLetter": true, "hole":2},
+        {"distance": 350, "isThereLetter": true, "hole":4},
+        {"distance": 400, "isThereLetter": false, "hole":-1}
+    ],
+
+    "letterBlocks" : true,
+    "megaPowerUps" : true,
+    "movingObstacles" : true,
+    "allowMineTurlte" : true,
+    "allowTp" : true
+}

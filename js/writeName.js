@@ -14,8 +14,7 @@ let botonNombre1, botonNombre2, botonNombre3;
 let textoNombre1, textoNombre2, textoNombre3;
 let predefinidos = ["Captain Rogers","Useless Ironman","I am a person"];
 
-//Estilo genérico
-var style = { font: "40px Arial", fill: "#ffffff", align: "left" };
+
 
 let writeNameState = {
     preload: preloadWN,
