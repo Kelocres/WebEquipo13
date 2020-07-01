@@ -111,7 +111,7 @@ let rocksEmitter;
 let walkingenemies;
 let numEnemies = 20;
 let enemyAppearing = 10;
-const crawlSpeed = 30;
+const crawlSpeed = 80;
 let allowMovingObstacles;
 
 
@@ -266,6 +266,7 @@ function updatePlay(){
     game.physics.arcade.overlap(walkingenemies, blocks, keeptheenemontheplat, null, this);
     game.physics.arcade.overlap(mineTurtles, blocks, function(mine){ mine.body.velocity.y = 0; mine.body.y-=1}, null, this);
     game.physics.arcade.overlap(player, fallIn, playerHitsFallInto, null, this);
+    game.physics.arcade.collide(walkingenemies, groupLetterBlocks, null, null, this);
     
     walkingenemies.forEach(chasePlayer, this);
     mineTurtles.forEach(justWander, this);
@@ -674,18 +675,18 @@ function setUpBlock(currentBlock, hole)
             }
             else if(allowMovingObstacles && Math.floor(Math.random()* 100 <= enemyAppearing)){//aparecera un walking enemy?
                 if(allowMineTurlte && Math.floor(Math.random()* 100 <= probTurtle)){
-                    let wEnemy = mineTurtles.getFirstExists(false);
-                    if(wEnemy)
+                    let turtleee = mineTurtles.getFirstExists(false);
+                    if(turtleee)
                     {
-                        wEnemy.reset(blockX, blockY-70);
-                        wEnemy.anchor.setTo(.5);
-                        wEnemy.scale.setTo(0.15,0.15);
-                        wEnemy.flipX = true;
-                        wEnemy.body.checkCollision.left = true;
-                        wEnemy.body.checkCollision.up = true;
-                        wEnemy.body.checkCollision.right = true;
-                        wEnemy.body.checkCollision.down = true;
-                        wEnemy.body.velocity.x = 50;
+                        turtleee.reset(blockX, blockY-50);
+                        turtleee.anchor.setTo(.5);
+                        turtleee.scale.setTo(0.25);
+                        turtleee.flipX = true;
+                        turtleee.body.checkCollision.left = true;
+                        turtleee.body.checkCollision.up = true;
+                        turtleee.body.checkCollision.right = true;
+                        turtleee.body.checkCollision.down = true;
+                        turtleee.body.velocity.x = 50;
                        
                     }
                 }
