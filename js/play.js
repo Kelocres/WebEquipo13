@@ -42,8 +42,15 @@ let powerUpsAppearing;
 let powerUpAccelerateActive;
 let  = false;
 const powerAcceleration = 1.5;
-let powerUp3Actived;
+let shieldPowerUp;
+let shieldPowerUpActived;
 const speedthreshold = 0.03;
+//cap trap
+let allowMegaPowerUps;
+let capPowerUp;
+let capPowerUpActive = false;
+const capPowerAcceleration = 3;
+const capPwerUpRate = 50;
 
 // END OF LEVEL BLOCKS
 let endBlocks;
@@ -86,9 +93,9 @@ let styleNumbers = { font: "22px Arial", fill: "#ffffff", align: "center" };
 let remainingPlatformsContainer;
 let currentLevelContainer;
 let powerUpContainer;
-let powerUp1Icon;
+let capPowerUpICon;
 let powerUpAccelerateIcon;
-let powerUp3Icon;
+let shieldPowerUpIcon;
 let levelsIndicatorText;
 let levelsText;
 let levelsNumber;
@@ -106,6 +113,7 @@ let messLose;
 let EXPLOSION_GROUP_SIZE = 30;
 let explosions;
 let rocksEmitter;
+let partsEmitter;
 
 //walking enemy
 let walkingenemies;
@@ -113,14 +121,6 @@ let numEnemies = 20;
 let enemyAppearing = 10;
 const crawlSpeed = 80;
 let allowMovingObstacles;
-
-
-//cap trap
-let allowMegaPowerUps;
-let capPowerUp;
-let capPowerUpActive = false;
-const capPowerAcceleration = 3;
-const capPwerUpRate = 50;
 
 //Fall in and fall out
 let fallIn;
@@ -163,7 +163,6 @@ function preloadPlay(){
     //game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_28.png');
     game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_LetterBlock.png');
     game.load.image('meta', 'assets/imgs/New enviroment/meta.png');
-    game.load.image('camerica', 'assets/imgs/camerica.png');
     game.load.image('hello', 'assets/imgs/spaceship.png');
     
     game.load.image('fallInTo', 'assets/imgs/mina/mine3_on.png');
@@ -182,10 +181,10 @@ function preloadPlay(){
     //FX
     game.load.spritesheet('explosion','assets/imgs/Mina/Explosion_SpriteSheet.png',210,210,58);
     game.load.image('rock','assets/imgs/New enviroment/Tile_17.png')
-    game.load.image('pedacito1','assets/imgs/New Player/Pedacitos/Pedacito1');
-    game.load.image('pedacito2','assets/imgs/New Player/Pedacitos/Pedacito2');
-    game.load.image('pedacito3','assets/imgs/New Player/Pedacitos/Pedacito3');
-    game.load.image('pedacito4','assets/imgs/New Player/Pedacitos/Pedacito4');
+    game.load.image('pedacito1','assets/imgs/New Player/Pedacitos/Pedacito1.png');
+    game.load.image('pedacito2','assets/imgs/New Player/Pedacitos/Pedacito2.png');
+    game.load.image('pedacito3','assets/imgs/New Player/Pedacitos/Pedacito3.png');
+    game.load.image('pedacito4','assets/imgs/New Player/Pedacitos/Pedacito4.png');
 
     //UI
     game.load.image("containerLifeBar", "assets/imgs/New UI/PNG/Main_UI/Health_Bar_Table.png");
@@ -197,7 +196,10 @@ function preloadPlay(){
     game.load.image('circularContainer1',"assets/imgs/New UI/PNG/Main_UI/Bonus_BTN_01.png");
     game.load.image('circularContainer2',"assets/imgs/New UI/PNG/Main_UI/Bonus_BTN_02.png");
 
+    //PowerUps
     game.load.image("cristal","assets/imgs/New enviroment/Tile_37ParaJuego.png");
+    game.load.image('camerica', 'assets/imgs/camerica.png');
+    game.load.image('shield',"assets/imgs/New UI/PNG/Upgrade/Armor_Icon.png");
 
     game.load.text("level",levelsData[currentLevel -1], true);
     //game.load.text("level",levelsData[1], true);
@@ -227,7 +229,8 @@ function createPlay(){
     createAnimations();
     createBackground();
     createExplosions(EXPLOSION_GROUP_SIZE);
-    createEmitter();
+    createRocksEmitter();
+    createPartsEmitter();
 
     game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
 
@@ -239,7 +242,7 @@ function createPlay(){
     playerSprite.bringToTop();//Puede que tenga más sentido que no esté así
     RemainingPlatformsNumber = levelConfig.platforms.length;
     PastPlatforms = 0;
-    DistanceToNextPlatform = levelConfig.platforms[PastPlatforms];
+    DistanceToNextPlatform = levelConfig.platforms[PastPlatforms].distance;
 
     //Para capturar los valores de las teclas del teclado, cuando haya LetterBlocks
     if(levelConfig.letterBlocks == true)
@@ -371,6 +374,21 @@ function createUI(){
     powerUpAccelerateIcon.fixedToCamera = true;
     powerUpAccelerateIcon.visible = false;
 
+    capPowerUpICon = game.add.sprite(0,0,'camerica');
+    capPowerUpICon.scale.setTo(0.10,0.10);
+    capPowerUpICon.x = 241.25;
+    capPowerUpICon.y = 753.25;
+    capPowerUpICon.fixedToCamera = true;
+    capPowerUpICon.visible = false;
+
+    shieldPowerUpIcon = game.add.sprite(0,0,'shield');
+    shieldPowerUpIcon.scale.setTo(0.28,0.28);
+    shieldPowerUpIcon.x = 244.25;
+    shieldPowerUpIcon.y = 757.5;
+    shieldPowerUpIcon.fixedToCamera = true;
+    shieldPowerUpIcon.visible = false;
+    shieldPowerUpActived = false;//Cambiar luego
+
     //Messages of winning or losing
 
 
@@ -401,7 +419,18 @@ function actualizarVida(){
     let valorActual = lifeBarRatio * playerLife/100;
     lifeBar.scale.setTo(valorActual, 1.2);
 
-    if(valorActual <= 0) playerIsDead();
+    if(valorActual <= 0){
+        throwParts();
+        //player.setActive(false);
+        
+        playerSprite.alpha = 0;
+        game.camera.target = null;
+        player.kill();
+        game.input.enabled = false;
+        //playerSprite.setActive(false);
+        game.time.events.add(Phaser.Timer.SECOND * 4, playerIsDead, this);
+        //playerIsDead();
+    } 
 }
 
 
@@ -528,13 +557,22 @@ function createBackground(){
     background.sendToBack();
 }
 
-function createEmitter(){
-    rocksEmitter = game.add.emitter(0, 0, 100);
+function createRocksEmitter(){
+    rocksEmitter = game.add.emitter(0, 0, 1000);
     rocksEmitter.makeParticles('rock');
     rocksEmitter.gravity = 200;
     rocksEmitter.minParticleScale = 0.25;
     rocksEmitter.maxParticleScale = 0.35;
     rocksEmitter.setAlpha(1, 0, 2000);
+}
+
+function createPartsEmitter(){
+    partsEmitter = game.add.emitter(0, 0, 100);
+    partsEmitter.makeParticles(['pedacito1','pedacito2','pedacito3','pedacito4']);
+    partsEmitter.gravity = 40;
+    partsEmitter.minParticleScale = 0.15;
+    partsEmitter.maxParticleScale = 0.20;
+    partsEmitter.setAlpha(1, 0, 2000);
 }
 
 function setUpBlock(currentBlock, hole)
@@ -808,7 +846,13 @@ function playerHitsBlock(player, block){
 function throwRocks(element){
     rocksEmitter.x = element.body.center.x;
     rocksEmitter.y = element.body.center.y;
-    rocksEmitter.start(true, 2000, null, 10);
+    rocksEmitter.start(true, 2000, null, 20);
+}
+
+function throwParts(){
+    partsEmitter.x = player.x;
+    partsEmitter.y = player.y;
+    partsEmitter.start(true, 2000, null, 12);
 }
 
 function playerHitsEndBlocks(player, endBlock)
@@ -840,19 +884,16 @@ function playerHitsLB(player, letterBlock)
 
 function playerHitsTrap(player, trap)
 {
+    displayExplosion(trap);
+    trap.destroy();
     if(capPowerUpActive){
         capPowerUpActive = false;
-        displayExplosion(trap);
-        trap.destroy();
     }
     else{
-        displayExplosion(trap);
-        trap.destroy();
-        playerLife -= trapDamage* player.body.velocity.y;
-        player.body.velocity.y =BOUNCE_CONSTANT;
+        playerLife -= trapDamage* Math.abs(player.body.velocity.y);
+        player.body.velocity.y = BOUNCE_CONSTANT;
         actualizarVida();
     }
-    
 }
 
 function justWander(turtle){
@@ -931,9 +972,11 @@ function animationsUpdate(){
 }
 
 function manageUI(){
-    if (player.body.y >= (DistanceToNextPlatform+10)){
+    if (player.body.y >= (DistanceToNextPlatform-4)){
+        //console.log("player "+player.body.y);
+        //console.log(DistanceToNextPlatform);
         PastPlatforms+=1;
-        DistanceToNextPlatform += levelConfig.platforms[PastPlatforms];
+        DistanceToNextPlatform += levelConfig.platforms[PastPlatforms].distance;
         RemainingPlatformsNumber-= 1;
     }
     //RemainingPlatformsNumber = 20 - Phaser.Math.snapToFloor((player.body.y +1)/200,1);//Corregir, no se cada cuanto pasas de bloque
@@ -942,6 +985,18 @@ function manageUI(){
     }
     else{
         powerUpAccelerateIcon.visible = false;
+    }
+    if(capPowerUpActive){
+        capPowerUpICon.visible = true;
+    }
+    else{
+        capPowerUpICon.visible = false;
+    }
+    if(shieldPowerUpActived){
+        shieldPowerUpIcon.visible = true;
+    }
+    else{
+        shieldPowerUpIcon.visible = false;
     }
     updateText();
 }
@@ -1100,6 +1155,7 @@ function playerIsDead()
     //Poner vida del jugador a tope y actualizar lifeBar
     gameEnded = true;
     defeated = true;
+    game.input.enabled = true;
     clearLevel();
     game.state.start('endgame');
 }

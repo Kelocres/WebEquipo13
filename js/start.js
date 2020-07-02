@@ -33,6 +33,10 @@ function cargaAssets()
     game.load.image('Detector_text','assets/imgs/New UI/PNG/Detector_Text.png');
 
     game.load.spritesheet('explosion','assets/imgs/Mina/Explosion_SpriteSheet.png',210,210,58);
+    game.load.image('pedacito1','assets/imgs/New Player/Pedacitos/Pedacito1.png');
+    game.load.image('pedacito2','assets/imgs/New Player/Pedacitos/Pedacito2.png');
+    game.load.image('pedacito3','assets/imgs/New Player/Pedacitos/Pedacito3.png');
+    game.load.image('pedacito4','assets/imgs/New Player/Pedacitos/Pedacito4.png');
 }
 
 function muestraPantalla()
@@ -66,6 +70,8 @@ function muestraPantalla()
 
         game.add.tween(mine_text).to({centerX:200},textAnimationTime,"Linear",true);
         game.add.tween(detector_text).to({centerX:200},textAnimationTime,"Linear",true);
+
+        game.time.events.add(textAnimationTime, playExplosion, this);
 
         btnSelectLevel = game.add.button(39, 250, 'botonSelectLevel', selectLevelPressed);
         btnSelectLevel.alpha = 0;
@@ -113,6 +119,20 @@ function muestraPantalla()
             btnSelectLevel.inputEnabled = false;
         }
     }
+}
+
+function playExplosion(){
+    let startPartsEmitter = game.add.emitter(200, 100, 100);
+    startPartsEmitter.makeParticles(['pedacito1','pedacito2','pedacito3','pedacito4']);
+    startPartsEmitter.gravity = 40;
+    startPartsEmitter.minParticleScale = 0.15;
+    startPartsEmitter.maxParticleScale = 0.20;
+    startPartsEmitter.setAlpha(1, 0, 2000);
+    startPartsEmitter.start(true, 2000, null, 12);
+
+    explosionAtStart = game.add.sprite(100,5,'explosion');
+    explosionAtStart.animations.add('bum');
+    explosionAtStart.animations.play('bum',30,false,true);
 }
 
 // MÉTODOS DE LOS BOTONES --------------------------
