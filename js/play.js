@@ -1,7 +1,7 @@
 
 const BOUNCE_CONSTANT = -170; // indice de rebote
 //const NUM_BLOCKS = 7;
-const BLOCK_SPEED = 3; // velocidad a la que los bloque se mueven
+let BLOCK_SPEED = 3; // velocidad a la que los bloque se mueven
 //const initBlockX = 80;// width of the block
 const initBlockX = 77;// width of the block
 
@@ -44,12 +44,13 @@ let  = false;
 const powerAcceleration = 1.5;
 let shieldPowerUp;
 let shieldPowerUpActived;
+let shieldPowerUpRate = 50;
 const speedthreshold = 0.03;
 //cap trap
 let allowMegaPowerUps;
 let capPowerUp;
 let capPowerUpActive = false;
-const capPowerAcceleration = 3;
+const capPowerAcceleration = 4;
 const capPwerUpRate = 50;
 
 // END OF LEVEL BLOCKS
@@ -231,6 +232,7 @@ function createPlay(){
     createExplosions(EXPLOSION_GROUP_SIZE);
     createRocksEmitter();
     createPartsEmitter();
+    createDashControls();
 
     game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
 
@@ -269,6 +271,7 @@ function updatePlay(){
     game.physics.arcade.overlap(walkingenemies, blocks, keeptheenemontheplat, null, this);
     game.physics.arcade.overlap(mineTurtles, blocks, function(mine){ mine.body.velocity.y = 0; mine.body.y-=1}, null, this);
     game.physics.arcade.overlap(player, fallIn, playerHitsFallInto, null, this);
+    game.physics.arcade.collide(player,shieldPowerUp,playerHitsShieldPowerUp,null,this);
     game.physics.arcade.collide(walkingenemies, groupLetterBlocks, null, null, this);
     
     walkingenemies.forEach(chasePlayer, this);
@@ -288,8 +291,22 @@ function updatePlay(){
     if(!gameEnded && player.body.velocity.y <= speedthreshold){
         capPowerUpActive = false;
         powerUpAccelerateActive = false;
+        shieldPowerUpActived = false;
     }
-    if(capPowerUpActive || powerUpAccelerateActive){
+    /*if(capPowerUpActive){
+        playerAcceleration = playerStandardSpeed*4;
+    }
+    else if(powerUpAccelerateActive){
+        playerAcceleration = playerStandardSpeed*2;
+    }
+    else{
+        playerAcceleration = playerStandardSpeed;
+    }*/
+    if(shieldPowerUpActived){
+        capPowerUpActive = false;
+        powerUpAccelerateActive = false;
+    }
+    if(!(powerUpAccelerateActive || capPowerUpActive)){
         playerAcceleration = playerStandardSpeed;
     }
 }
@@ -415,6 +432,12 @@ function playerHitsCapPowerUp(player, power){
     game.time.events.add(Phaser.Timer.SECOND * 4, function(){playerAcceleration = playerStandardSpeed; capPowerUpActive = false}, this);
 }
 
+function playerHitsShieldPowerUp(player, power){
+    power.destroy();
+    shieldPowerUpActived = true;
+    game.time.events.add(Phaser.Timer.SECOND * 4, function(){playerAcceleration = playerStandardSpeed; shieldPowerUpActived = false}, this);
+}
+
 function actualizarVida(){
     let valorActual = lifeBarRatio * playerLife/100;
     lifeBar.scale.setTo(valorActual, 1.2);
@@ -489,6 +512,12 @@ function createBlock(){
     game.physics.arcade.enable(capPowerUp);
     capPowerUp.createMultiple(numPlatforms, 'camerica');
 
+    //The group of shield powerups
+    shieldPowerUp = game.add.group();
+    shieldPowerUp.enableBody = true;
+    game.physics.arcade.enable(shieldPowerUp);
+    shieldPowerUp.createMultiple(numPlatforms, 'shield');
+
     //The blocks of at the end of the level
     endBlocks = game.add.group();
     endBlocks.enableBody = true;
@@ -525,7 +554,7 @@ function createBlock(){
         blockY += levelConfig.platforms[i].distance;
         hole = levelConfig.platforms[i].hole;
         blockX = firstBlockX;
-        trapAppearing += incrementTrapAppearing;
+        //trapAppearing += incrementTrapAppearing;
         letterBlockInPlatform = levelConfig.platforms[i].isThereLetter;
         //console.log("letterBlockInPlatform "+ letterBlockInPlatform);
         if(i>2){
@@ -621,6 +650,18 @@ function setUpBlock(currentBlock, hole)
                     {
                         itemPower.reset(blockX, blockY-5);
                         itemPower.scale.setTo(0.18, 0.18);
+                        itemPower.body.checkCollision.left = true;
+                        itemPower.body.checkCollision.up = true;
+                        itemPower.body.checkCollision.right = true;
+                        itemPower.body.immovable =true;
+                    }
+                }
+                else if(levelsNumber == 3 && Math.floor(Math.random()* 100) <= shieldPowerUpRate){
+                    let itemPower = shieldPowerUp.getFirstExists(false);
+                    if(itemPower)
+                    {
+                        itemPower.reset(blockX, blockY-5);
+                        itemPower.scale.setTo(0.58, 0.58);
                         itemPower.body.checkCollision.left = true;
                         itemPower.body.checkCollision.up = true;
                         itemPower.body.checkCollision.right = true;
@@ -886,10 +927,13 @@ function playerHitsTrap(player, trap)
 {
     displayExplosion(trap);
     trap.destroy();
-    if(capPowerUpActive){
-        capPowerUpActive = false;
+    if(shieldPowerUpActived){
+        shieldPowerUpActived = false;
     }
     else{
+        /*if(capPowerUpActive){
+            capPowerUpActive = false;
+        }*/
         playerLife -= trapDamage* Math.abs(player.body.velocity.y);
         player.body.velocity.y = BOUNCE_CONSTANT;
         actualizarVida();
@@ -1016,15 +1060,15 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             explosions.forEach(movementCursorRight,this);
             walkingenemies.forEach(movementCursorRight,this);
             capPowerUp.forEach(movementCursorRight,this);
+            shieldPowerUp.forEach(movementCursorRight,this);
             mineTurtles.forEach(movementCursorRight,this);
             fallIn.forEach(movementCursorRight,this);
             fallOut.forEach(movementCursorRight,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementRight();
-            //playerSprite.scale.setTo(-playerScale,playerScale);
             if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX;
         }
-        if(cursorLeft.isDown/* || game.input.speed.x < 0*/){
+        else if(cursorLeft.isDown/* || game.input.speed.x < 0*/){
             blocks.forEach(movementCursorLeft, this);
             traps.forEach(movementCursorLeft, this);
             trapShow.forEach(movementCursorLeft, this);
@@ -1033,17 +1077,17 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             explosions.forEach(movementCursorLeft,this);
             walkingenemies.forEach(movementCursorLeft,this);
             capPowerUp.forEach(movementCursorLeft,this);
+            shieldPowerUp.forEach(movementCursorLeft,this);
             mineTurtles.forEach(movementCursorLeft,this);
             fallIn.forEach(movementCursorLeft,this);
             fallOut.forEach(movementCursorLeft,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementLeft();
-            //playerSprite.scale.setTo(playerScale,playerScale);
             if(background.x<(-background.x))background.x += backgroundMoveFactorX;
         }
 
         // Ajustando con la velocidad del ratón
-        if(game.input.activePointer.leftButton.isDown) //Botón izquierdo del ratón pulsado
+        else if(game.input.activePointer.leftButton.isDown) //Botón izquierdo del ratón pulsado
         {
             blocks.forEach(movementMouse, this);
             traps.forEach(movementMouse, this);
@@ -1054,6 +1098,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             walkingenemies.forEach(movementMouse,this);
             mineTurtles.forEach(movementMouse,this);
             capPowerUp.forEach(movementMouse,this);
+            shieldPowerUp.forEach(movementMouse,this);
             fallOut.forEach(movementMouse,this);
             fallIn.forEach(movementMouse,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
@@ -1063,7 +1108,6 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             if(background.x<(-background.x))background.x += backgroundMoveFactorX;
 
         }
-        
     }  
 }
 
@@ -1092,6 +1136,46 @@ function displayExplosion(trap) {
     explosion.reset(x, y);
     //explosion.bringToTop();
     explosion.play('explosion', 30, false, true);
+}
+
+function dashLeft(){
+    BLOCK_SPEED = BLOCK_SPEED * 10;
+    blocks.forEach(movementCursorLeft, this);
+    traps.forEach(movementCursorLeft, this);
+    trapShow.forEach(movementCursorLeft, this);
+    powerUps.forEach(movementCursorLeft, this);
+    endBlocks.forEach(movementCursorLeft, this);
+    explosions.forEach(movementCursorLeft,this);
+    walkingenemies.forEach(movementCursorLeft,this);
+    capPowerUp.forEach(movementCursorLeft,this);
+    shieldPowerUp.forEach(movementCursorLeft,this);
+    mineTurtles.forEach(movementCursorLeft,this);
+    fallIn.forEach(movementCursorLeft,this);
+    fallOut.forEach(movementCursorLeft,this);
+    for(let i=0; i<groupLetterBlocks.length; i++)
+        groupLetterBlocks[i].movementLeft();
+    if(background.x<(-background.x))background.x += backgroundMoveFactorX*10;
+    BLOCK_SPEED =BLOCK_SPEED/10;
+}
+
+function dashRight(){
+    BLOCK_SPEED *= 10;
+    blocks.forEach(movementCursorRight, this);
+    traps.forEach(movementCursorRight, this);
+    trapShow.forEach(movementCursorRight, this);
+    powerUps.forEach(movementCursorRight, this);
+    endBlocks.forEach(movementCursorRight, this);
+    explosions.forEach(movementCursorRight,this);
+    walkingenemies.forEach(movementCursorRight,this);
+    capPowerUp.forEach(movementCursorRight,this);
+    shieldPowerUp.forEach(movementCursorRight,this);
+    mineTurtles.forEach(movementCursorRight,this);
+    fallIn.forEach(movementCursorRight,this);
+    fallOut.forEach(movementCursorRight,this);
+    for(let i=0; i<groupLetterBlocks.length; i++)
+        groupLetterBlocks[i].movementRight();
+    if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX*10;
+    BLOCK_SPEED /=10;
 }
 
 // MOVIMIENTO CON LOS BOTONES
@@ -1143,7 +1227,14 @@ function createKeyControls(){
 
     leftBottom = game.input.keyboard.addKey(Phaser.Mouse.LEFT_BUTTON);
     rightBottom = game.input.keyboard.addKey(Phaser.Mouse.RIGHT_BUTTON);
+}
 
+function createDashControls(){
+    dashLeftBottom = game.input.keyboard.addKey(Phaser.Keyboard.Z);
+    dashRightBottom = game.input.keyboard.addKey(Phaser.Keyboard.X);
+
+    dashLeftBottom.onDown.add(dashLeft);
+    dashRightBottom.onDown.add(dashRight);
 }
 
 function playerIsDead()

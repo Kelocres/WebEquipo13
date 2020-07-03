@@ -4,8 +4,6 @@ let startState =
     create: muestraPantalla
 }
 
-
-
 //The buttons
 let btnSelectName, btnAbout, btnInstrucions, btnSelectLevel;
 
