@@ -20,6 +20,8 @@ let currentLevel;
 //Estilo genérico
 var style = { font: "40px Arial", fill: "#ffffff", align: "left" };
 
+//Orientación del ratón, modificable en las instrucciones
+let mouseEffect = 1;
 
 function cargaAssets() 
 {

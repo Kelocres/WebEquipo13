@@ -1119,7 +1119,7 @@ function movementMouse(element)
 {
     if(Math.abs(game.input.speed.x)<150)
     {
-        element.body.x -= game.input.speed.x;
+        element.body.x += game.input.speed.x * mouseEffect;
         if(element.body.x < -initBlockX){
             element.body.x += worldMargin + 2*initBlockX; // += para ajustar su verdadera posicion en relacion con lo demas boques
         }
@@ -1293,8 +1293,8 @@ class LetterBlock {
     {
         if(Math.abs(game.input.speed.x)<150)
         {
-            this.sprite.body.x -= game.input.speed.x;
-            this.assignedLetter.body.x -= game.input.speed.x;
+            this.sprite.body.x += game.input.speed.x * mouseEffect;
+            this.assignedLetter.body.x += game.input.speed.x * mouseEffect;
             if(this.sprite.body.x < -initBlockX)
             {
                 this.sprite.body.x += worldMargin + 2*initBlockX; // += para ajustar su verdadera posicion en relacion con lo demas boques
