@@ -151,11 +151,6 @@ let playState = {
 }
 
 function preloadPlay(){
-    
-    game.load.spritesheet('enviroment','assets/imgs/Enviroment/Assets/Assets.png', 16, 16);
-    game.load.spritesheet("BordersV1", "assets/imgs/UI/Borders(8x8).png",8,8);
-    game.load.spritesheet("BordersV2", "assets/imgs/UI/Borders2(8x8).png",8,8);
-    
     //Enviroment
     //game.load.spritesheet('bloque', 'assets/imgs/New enviroment/spritesheet_tileset.png', 107, 107, 300);
     game.load.image('bloque', 'assets/imgs/New enviroment/Tile_13.png');
