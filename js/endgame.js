@@ -16,6 +16,7 @@ function preloadEndGame()
 {
     game.load.image('endBackground','assets/imgs/New enviroment/BackGrounds/endscreen_Background.jpg');
     game.load.image('botonback', 'assets/imgs/New UI/PNG/Buttons/Back.png');
+    game.load.audio('Back_Click_Sound','assets/audio/Back_Click_Sound.wav');
 
 }
 
@@ -72,6 +73,7 @@ function resetToStart()
 function BackToMenu() //Si el contador llega a 0 o se pulsa el botón
 {
     resetToStart();
+    back_click_sound.play();
     game.state.start("start");
 }
 

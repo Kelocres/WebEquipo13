@@ -14,6 +14,11 @@ let firstStart;
 let textAnimationTime;
 let currentLevel;
 
+//Sounds
+let standard_click_sound;
+let back_click_sound;
+let explosion_at_start;
+
 //Estilo genérico
 var style = { font: "40px Arial", fill: "#ffffff", align: "left" };
 
@@ -31,10 +36,16 @@ function cargaAssets()
     game.load.image('Mine_text','assets/imgs/New UI/PNG/Mine_Text.png');
     game.load.image('Detector_text','assets/imgs/New UI/PNG/Detector_Text.png');
 
+    //Audio
+    game.load.audio('Standard_Click_Sound','assets/audio/Standard_Click_Sound.wav');
+    game.load.audio('Back_Click_Sound','assets/audio/Back_Click_Sound.wav');
+    game.load.audio('Explosion_At_Start','assets/audio/Explosion_At_Start.wav');
+
 }
 
 function muestraPantalla()
 {
+    createMenuSounds();
     if(firstStart == null) firstStart = true;
     textAnimationTime = 750;
 
@@ -52,8 +63,9 @@ function muestraPantalla()
         detector_text.left = 420;
         detector_text.y = 130;
 
-        game.add.tween(mine_text).to({centerX:200},textAnimationTime,"Linear",true);
+        let mine_text_anim = game.add.tween(mine_text).to({centerX:200},textAnimationTime,"Linear",true);
         game.add.tween(detector_text).to({centerX:200},textAnimationTime,"Linear",true);
+        mine_text_anim.onComplete.add(function(){explosion_at_start.play()});
 
         btnSelectLevel = game.add.button(39, 250, 'botonSelectLevel', selectLevelPressed);
         btnSelectLevel.alpha = 0;
@@ -102,8 +114,14 @@ function muestraPantalla()
     }
 }
 
+function createMenuSounds(){
+    standard_click_sound = game.add.audio('Standard_Click_Sound');
+    back_click_sound = game.add.audio('Back_Click_Sound');
+    explosion_at_start = game.add.audio('Explosion_At_Start');
+}
+
 // MÉTODOS DE LOS BOTONES --------------------------
-function aboutPressed()     {game.state.start('about');}
-function selectLevelPressed()   {game.state.start('select_level');}
-function selectNamePressed()      {game.state.start('writeName');}
-function instPressed()      {game.state.start('instrucions');}
+function aboutPressed()     {game.state.start('about');standard_click_sound.play();}
+function selectLevelPressed()   {game.state.start('select_level');standard_click_sound.play();}
+function selectNamePressed()      {game.state.start('writeName');standard_click_sound.play();}
+function instPressed()      {game.state.start('instrucions');standard_click_sound.play();}

@@ -23,6 +23,9 @@ function cargaAssets() {
     game.load.image('izquierdaPositivo', 'assets/imgs/New UI/PNG/Buttons/BTNs_Active/Forward_BTN.png');
     game.load.image('derechaPositivo', 'assets/imgs/New UI/PNG/Buttons/BTNs_Active/Backward_BTN.png');
 
+    //Audio
+    game.load.audio('Standard_Click_Sound','assets/audio/Standard_Click_Sound.wav');
+    game.load.audio('Back_Click_Sound','assets/audio/Back_Click_Sound.wav');
 }
 
 function muestraPantalla() {
@@ -60,6 +63,7 @@ function muestraPantalla() {
 
 function changeMouseEffect()
 {
+    standard_click_sound.play();
     mouseEffect = -mouseEffect;
 
     if(mouseEffect == 1)

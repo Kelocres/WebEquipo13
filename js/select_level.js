@@ -22,6 +22,10 @@ function cargaAssets()
     game.load.image("background", "assets/imgs/New enviroment/BackGrounds/BG space 2.jpg");
     game.load.image('Mine_text','assets/imgs/New UI/PNG/Mine_Text.png');
     game.load.image('Detector_text','assets/imgs/New UI/PNG/Detector_Text.png');
+
+    //Audio
+    game.load.audio('Standard_Click_Sound','assets/audio/Standard_Click_Sound.wav');
+    game.load.audio('Back_Click_Sound','assets/audio/Back_Click_Sound.wav');
 }
 
 function muestraPantalla()
@@ -48,16 +52,19 @@ function muestraPantalla()
 function playLevel1(){
     console.log("Nivel 1");
     currentLevel = 1;
+    standard_click_sound.play();
     game.state.start('play');
 }
 function playLevel2(){
     console.log("Nivel 2");
     currentLevel = 2;
+    standard_click_sound.play();
     game.state.start('play');
 }
 function playLevel3(){
     console.log("Nivel 3");
     currentLevel = 3;
+    standard_click_sound.play();
     game.state.start('play');
 }
-function backPressed(){game.state.start('start');}
+function backPressed(){game.state.start('start');back_click_sound.play();}

@@ -28,6 +28,10 @@ function preloadWN()
     game.load.image('botonback', 'assets/imgs/New UI/PNG/Buttons/Back.png');
     //game.load.image('botonplay','assets/imgs/botonPlay.png');
     game.load.image('boton','assets/imgs/New UI/PNG/Pause/Table.png');
+
+    //Audio
+    game.load.audio('Standard_Click_Sound','assets/audio/Standard_Click_Sound.wav');
+    game.load.audio('Back_Click_Sound','assets/audio/Back_Click_Sound.wav');
 }
 
 function createWN()
@@ -101,16 +105,19 @@ function borrarLetra()
 
 function escribirPredefinido1()
 {
+    standard_click_sound.play();
     playerName = predefinidos[0];
     changeName();
 }
 function escribirPredefinido2()
 {
+    standard_click_sound.play();
     playerName = predefinidos[1];
     changeName();
 }
 function escribirPredefinido3()
 {
+    standard_click_sound.play();
     playerName = predefinidos[2];
     changeName();
 }
@@ -154,5 +161,6 @@ function changeName()
 function startPlay()
 {
     //currentLevel = 1;
+    back_click_sound.play();
     if(playerName!=null && playerName!="") game.state.start('start');
 }

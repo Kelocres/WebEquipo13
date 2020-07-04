@@ -12,6 +12,10 @@ var styleInfo = { font: "30px Arial", fill: "#ffffff", align: "left" };
 function loadAboutAssets() {
     game.load.image('botonback', 'assets/imgs/New UI/PNG/Buttons/Back.png');
     game.load.image("background", "assets/imgs/New enviroment/BackGrounds/BG space 2.jpg")
+
+    //Audio
+    game.load.audio('Standard_Click_Sound','assets/audio/Standard_Click_Sound.wav');
+    game.load.audio('Back_Click_Sound','assets/audio/Back_Click_Sound.wav');
 }
 
 function showInstructions() {
@@ -52,6 +56,7 @@ function showInstructions() {
 }
 
 function onBackButtonPressed() {
+    back_click_sound.play();
     game.state.start('start');
 }
 

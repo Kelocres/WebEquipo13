@@ -71,7 +71,7 @@ const spriteDistance = 130;
 let playerFlexAnimation;
 let playerJumpAnimation;
 let playerFallAnimation;
-let playerJumpling;
+let playerJumping;
 let defeated = false;
 
 //Background
@@ -80,7 +80,7 @@ const backgroundMoveFactor = 0.4;
 const backgroundMoveFactorX = 1;
 const backgroundMoveFactorY = 0.895;
 const backgoundBaseX = -800;
-const backgoundBaseY = -200;
+const backgoundBaseY = -50;
 
 let velocidadTope;
 
@@ -138,7 +138,21 @@ let mineTurtles;
 let allowMineTurlte;
 const probTurtle = 20;
 
+//Sounds
+let Breaking_Blocks_Sound;
+let Bust_Velocidad_Sound;
+let CapAmerica_Sound;
+let Dash_Sound;
+let Explosion_Sound;
+let Floor_Impact_Sound;
+let Gore_Sound;
+let Jump_Sound;
+let Portal_Sound;
+let Shield_Sound;
+let Sound_Track;
+let Letter_Block_Sound;
 
+let cameraLimit;
 
 let levelConfig;
 
@@ -203,6 +217,19 @@ function preloadPlay(){
     // load moving obstacle anim
     game.load.spritesheet('mo0',"assets/imgs/Bicho que anda/run/mo.png", 1056, 636, 16);
 
+    //Audio
+    game.load.audio('Letter_Block_Sound','assets/audio/Letter_Block.wav');
+    game.load.audio('Breaking_Blocks_Sound','assets/audio/BreakingBlocks.wav');
+    game.load.audio('Bust_Velocidad_Sound','assets/audio/Bust_Velocidad.wav');
+    game.load.audio('CapAmerica_Sound','assets/audio/CapAmerica.wav');
+    game.load.audio('Dash_Sound','assets/audio/Dash.wav');
+    game.load.audio('Explosion_Sound','assets/audio/Explosion.wav');
+    game.load.audio('Floor_Impact_Sound','assets/audio/Floor_Impact.wav');
+    game.load.audio('Gore_Sound','assets/audio/Gore.wav');
+    game.load.audio('Jump_Sound','assets/audio/Jump.wav');
+    game.load.audio('Portal_Sound','assets/audio/Portal.wav');
+    game.load.audio('Shield_Sound','assets/audio/Shield.wav');
+    game.load.audio('Sound_Track','assets/audio/8-summer-love.mp3');
 
 }
 
@@ -218,6 +245,7 @@ function createPlay(){
     levelsNumber = levelConfig.levelNumber;
     allowMineTurlte = levelConfig.allowMineTurlte;
     allowTp = levelConfig.allowTp;
+    createPlaySounds();
     createPlayer();
     createCameraBounds();
     createKeyControls();
@@ -248,6 +276,8 @@ function createPlay(){
         //console.log("Hay bloques");
     }
 
+    Sound_Track.play();
+    
 }
 
 function updatePlay(){
@@ -288,21 +318,16 @@ function updatePlay(){
         powerUpAccelerateActive = false;
         shieldPowerUpActived = false;
     }
-    /*if(capPowerUpActive){
-        playerAcceleration = playerStandardSpeed*4;
-    }
-    else if(powerUpAccelerateActive){
-        playerAcceleration = playerStandardSpeed*2;
-    }
-    else{
-        playerAcceleration = playerStandardSpeed;
-    }*/
     if(shieldPowerUpActived){
         capPowerUpActive = false;
         powerUpAccelerateActive = false;
     }
     if(!(powerUpAccelerateActive || capPowerUpActive)){
         playerAcceleration = playerStandardSpeed;
+    }
+
+    if(player.y > cameraLimit){
+        game.camera.target = null;
     }
 }
 
@@ -316,15 +341,19 @@ function createPlayer(){
     playerSprite = game.add.sprite( playerPosX - spriteDistance*playerScale-8, playerPosY+10, 'playerSprite');
     playerSprite.scale.setTo(playerScale,playerScale);
     playerSprite.frame = 10;
-    playerJumpling = false;
+    playerJumping = false;
 }
 
 function createCameraBounds(){
     game.camera.bounds = (800,400);
     game.camera.follow(player);
     game.camera.deadzone = new Phaser.Rectangle(0, 100, 800, 80);
-    //https://phaser.io/examples/v2/camera/deadzone
-    
+
+    cameraLimit = 0;
+    for (let i = 0; i<levelConfig.platforms.length; i++){
+        cameraLimit += levelConfig.platforms[i].distance;
+    }
+    cameraLimit -= 600;
 }
 
 function createUI(){
@@ -406,6 +435,24 @@ function createUI(){
 
 }
 
+function createPlaySounds(){
+    Breaking_Blocks_Sound = game.add.audio('Breaking_Blocks_Sound');
+    Breaking_Blocks_Sound.volume = 1.5;
+    Letter_Block_sound = game.add.audio('Letter_Block_Sound');
+    Bust_Velocidad_Sound = game.add.audio('Bust_Velocidad_Sound');
+    CapAmerica_Sound = game.add.audio('CapAmerica_Sound');
+    Dash_Sound = game.add.audio('Dash_Sound');
+    Explosion_Sound = game.add.audio('Explosion_Sound');
+    Floor_Impact_Sound = game.add.audio('Floor_Impact_Sound');
+    Gore_Sound = game.add.audio('Gore_Sound');
+    Jump_Sound = game.add.audio('Jump_Sound');
+    Portal_Sound = game.add.audio('Portal_Sound');
+    Shield_Sound = game.add.audio('Shield_Sound');
+    Sound_Track = game.add.audio('Sound_Track');
+    Sound_Track.volume = 0.7;
+    Sound_Track.loop = true;
+}
+
 function createExplosions(number){
     explosions = game.add.group();
     explosions.enableBody = true;
@@ -414,13 +461,12 @@ function createExplosions(number){
 }
 
 function setupExplosion(explosion){
-    //explosion.anchor.x = 0.5;
-    //explosion.anchor.y = 0.5;
     explosion.animations.add('explosion');
 }
 
 function playerHitsCapPowerUp(player, power){
     power.destroy();
+    CapAmerica_Sound.play();
     playerAcceleration *= capPowerAcceleration;
     capPowerUpActive = true;
     
@@ -428,6 +474,7 @@ function playerHitsCapPowerUp(player, power){
 }
 
 function playerHitsShieldPowerUp(player, power){
+    Shield_Sound.play();
     power.destroy();
     shieldPowerUpActived = true;
     game.time.events.add(Phaser.Timer.SECOND * 4, function(){playerAcceleration = playerStandardSpeed; shieldPowerUpActived = false}, this);
@@ -439,15 +486,11 @@ function actualizarVida(){
 
     if(valorActual <= 0){
         throwParts();
-        //player.setActive(false);
-        
         playerSprite.alpha = 0;
         game.camera.target = null;
         player.kill();
         game.input.enabled = false;
-        //playerSprite.setActive(false);
         game.time.events.add(Phaser.Timer.SECOND * 4, playerIsDead, this);
-        //playerIsDead();
     } 
 }
 
@@ -830,11 +873,12 @@ function playerHitsBlock(player, block){
     
     //Que tanto en personaje como los bloques tengan colliders muy finos podrian solucionar el problema de que rebote si da en un lado del bloque
     if(block.body.touching.up == true){
-
+        Floor_Impact_Sound.play();
         //console.log(block.body.y);
         //Si va más rápido que cierto valor, el bloque se rompe
         if(player.body.velocity.y >= VELOCITY_BREAKS_BLOCK)
         {
+            Breaking_Blocks_Sound.play();
             let destroyedBlocks = 0, destroyedTraps = 0, destroyedShowTraps = 0;
             brokenPlatformY = block.body.y;
             blocks.forEach(function(everyBlock)
@@ -847,6 +891,7 @@ function playerHitsBlock(player, block){
                 }
             });
             //Las trampas también tienen que desaparecer
+            //Puede que aqui toque meter explosión de mina (sonido o usar la funcion para haga tambien anim)
             traps.forEach(function(everyTrap)
             {
                 if(everyTrap.body.y == brokenPlatformY)
@@ -870,7 +915,7 @@ function playerHitsBlock(player, block){
         player.body.velocity.y =BOUNCE_CONSTANT;
         //Meter anim aquí
         playerJumpAnimation.play();
-        playerJumpling = true;
+        playerJumping = true;
     }
     else if(block.body.touching.down == true)
         player.body.velocity.y = - player.body.velocity.y 
@@ -886,6 +931,7 @@ function throwRocks(element){
 }
 
 function throwParts(){
+    Gore_Sound.play();
     partsEmitter.x = player.x;
     partsEmitter.y = player.y;
     partsEmitter.start(true, 2000, null, 12);
@@ -896,7 +942,7 @@ function playerHitsEndBlocks(player, endBlock)
     //Mostrar mensaje de victoria
     //Temporizador para tardar un poco en pasar al siguiente nivel
     //Fade out opcional
-
+    Sound_Track.stop();
     nextLevel();
 
 }
@@ -909,7 +955,7 @@ function playerHitsLB(player, letterBlock)
         player.body.velocity.y =BOUNCE_CONSTANT;
         //Meter anim aquí
         playerJumpAnimation.play('flex');
-        playerJumpling = true;
+        playerJumping = true;
     }
     else if(letterBlock.body.touching.down == true)
         player.body.velocity.y = - player.body.velocity.y 
@@ -947,6 +993,7 @@ function playerHitsTrapShow(player, trap){
 }
 
 function playerHitsFallInto(player, fallin){
+    Portal_Sound.play();
     let maAux = 0;
     let falloutaux = fallOutArray[0];
     while(maAux < fallOutArray.length && !(fallin.body.y - falloutaux.body.y > 600 && fallin.body.y - falloutaux.body.y < 1500)){
@@ -985,12 +1032,11 @@ function keeptheenemontheplat(enem, plat){
 
 function playerHitspowerUp(player, powerUp){
     powerUp.destroy();
+    Bust_Velocidad_Sound.play();
     playerAcceleration *= powerAcceleration;
     powerUpAccelerateActive = true;
 
     game.time.events.add(Phaser.Timer.SECOND * 4, function(){playerAcceleration = playerStandardSpeed; powerUpAccelerateActive = false}, this);
-    //var timedEvent = this.time.delayedCall(3000, function(){playerAcceleration = 2; powerUpAccelerateActive = false}, [], this);
-    //var timedEvent = this.time.addEvent({ delay: 500, callback: function(){playerAcceleration = 2; powerUpAccelerateActive = false}, callbackScope: this, loop: true });
 }
 
 function spriteUpdate(){
@@ -999,26 +1045,24 @@ function spriteUpdate(){
 }
 
 function animationsUpdate(){
-    if(playerJumpling){
+    if(playerJumping){
         if(playerFlexAnimation.isFinished){
+            Jump_Sound.play();
             playerJumpAnimation.play();
         }
         else if(playerJumpAnimation.isFinished){
             playerFallAnimation.play();
-            playerJumpling = false;
+            playerJumping = false;
         }
     }
 }
 
 function manageUI(){
     if (player.body.y >= (DistanceToNextPlatform-4)){
-        //console.log("player "+player.body.y);
-        //console.log(DistanceToNextPlatform);
         PastPlatforms+=1;
         DistanceToNextPlatform += levelConfig.platforms[PastPlatforms].distance;
         RemainingPlatformsNumber-= 1;
     }
-    //RemainingPlatformsNumber = 20 - Phaser.Math.snapToFloor((player.body.y +1)/200,1);//Corregir, no se cada cuanto pasas de bloque
     if(powerUpAccelerateActive){
         powerUpAccelerateIcon.visible = true;
     }
@@ -1098,7 +1142,6 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             fallIn.forEach(movementMouse,this);
             for(let i=0; i<groupLetterBlocks.length; i++)
                 groupLetterBlocks[i].movementMouse();
-            //playerSprite.scale.setTo(-playerScale,playerScale);
             if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX;
             if(background.x<(-background.x))background.x += backgroundMoveFactorX;
 
@@ -1129,11 +1172,12 @@ function displayExplosion(trap) {
     let x = trap.body.center.x - explosion.width/2;
     let y = trap.body.center.y - explosion.height*0.735;
     explosion.reset(x, y);
-    //explosion.bringToTop();
+    Explosion_Sound.play();
     explosion.play('explosion', 30, false, true);
 }
 
 function dashLeft(){
+    Dash_Sound.play();
     BLOCK_SPEED = BLOCK_SPEED * 10;
     blocks.forEach(movementCursorLeft, this);
     traps.forEach(movementCursorLeft, this);
@@ -1154,6 +1198,7 @@ function dashLeft(){
 }
 
 function dashRight(){
+    Dash_Sound.play();
     BLOCK_SPEED *= 10;
     blocks.forEach(movementCursorRight, this);
     traps.forEach(movementCursorRight, this);
@@ -1234,10 +1279,7 @@ function createDashControls(){
 
 function playerIsDead()
 {
-    //playerFallAnimation.play();
-    //player.x = levelConfig.playerStart.x;
-    //player.y = levelConfig.playerStart.y;
-
+    Sound_Track.stop();
     //Poner vida del jugador a tope y actualizar lifeBar
     gameEnded = true;
     defeated = true;
@@ -1342,7 +1384,7 @@ class LetterBlock {
         if(letter == this.assignedLetter.text)
         {
             this.solid = false;
-
+            Letter_Block_sound.play();
             this.disappearBlock.start();
             this.disappearLetter.start();
 
