@@ -951,7 +951,7 @@ function playerHitsLB(player, letterBlock)
 {
     if(letterBlock.body.touching.up == true)
     {
-        
+        Floor_Impact_Sound.play();
         player.body.velocity.y =BOUNCE_CONSTANT;
         //Meter anim aquí
         playerJumpAnimation.play('flex');
@@ -971,10 +971,10 @@ function playerHitsTrap(player, trap)
     if(shieldPowerUpActived){
         shieldPowerUpActived = false;
     }
+    else if(capPowerUpActive){
+        capPowerUpActive = false;
+    }
     else{
-        /*if(capPowerUpActive){
-            capPowerUpActive = false;
-        }*/
         playerLife -= trapDamage* Math.abs(player.body.velocity.y);
         player.body.velocity.y = BOUNCE_CONSTANT;
         actualizarVida();
