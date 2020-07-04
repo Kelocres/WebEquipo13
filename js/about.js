@@ -27,8 +27,8 @@ function showInstructions() {
     let credits = 'Make the ball go as\nfast as possible to the\nbottom and avoidall \nthe obstacles';
     game.add.text(25, game.world.height / 6, credits, styleInfo);
 
-    let msgAuthors = 'MADE BY';
-    game.add.text(125, game.world.height / 2 , msgAuthors, style);
+    let msgAuthors = 'CODE MADE BY';
+    game.add.text(40, game.world.height / 2 , msgAuthors, style);
 
     authors = game.add.group();
     authors.inputEnableChildren = true;
