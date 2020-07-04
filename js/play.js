@@ -41,7 +41,7 @@ let powerUps;
 let powerUpsAppearing;
 let powerUpAccelerateActive;
 let  = false;
-const powerAcceleration = 1.5;
+const powerAcceleration = 2;
 let shieldPowerUp;
 let shieldPowerUpActived;
 let shieldPowerUpRate = 50;
@@ -815,7 +815,7 @@ function setUpBlock(currentBlock, hole)
 
                         wEnemy.reset(blockX, blockY-70);
                         wEnemy.anchor.setTo(.5);
-                        wEnemy.scale.setTo(0.1,0.1);
+                        wEnemy.scale.setTo(0.08,0.08);
                         wEnemy.body.checkCollision.left = true;
                         wEnemy.body.checkCollision.up = true;
                         wEnemy.body.checkCollision.right = true;
@@ -1150,21 +1150,24 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
 }
 
 function chasePlayer(element){
-    if(!(element.body.touching.left || element.body.touching.right) && element.body.y - player.body.y <=200){
+    if(!(element.body.touching.left || element.body.touching.right) && element.body.touching.down && element.body.y - player.body.y <=200){
         element.animations.play('mo', true);
         if(player.body.x-element.body.x > 40){
             element.body.velocity.x = crawlSpeed;
-            element.scale.setTo(-0.1,0.1);
+            element.body.velocity.y = 10;
+            element.scale.setTo(-0.08,0.08);
         }
         else{
             element.body.velocity.x = -crawlSpeed;
-            element.scale.setTo(0.1,0.1);
+            element.body.velocity.y = 10;
+            element.scale.setTo(0.08,0.08);
         }
     }
     else{
         element.body.velocity.x = 0;
+        element.body.velocity.y = 10;
     }
-    element.body.velocity.y  +=100;
+    element.body.velocity.y =100;
 }
 
 function displayExplosion(trap) {
