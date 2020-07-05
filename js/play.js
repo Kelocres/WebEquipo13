@@ -888,6 +888,23 @@ function playerHitsBlock(player, block){
                     throwRocks(everyBlock);
                     everyBlock.kill();
                     destroyedBlocks++;
+                    trapShow.forEach(function(trap){
+                        if(trap.body.y = brokenPlatformY){
+                            trap.kill();
+                        }
+                    });
+                    traps.forEach(function(trap){
+                        if(trap.body.y = brokenPlatformY){
+                            trap.kill();
+                        }
+                    });
+                    for(let i = 0; i< groupLetterBlocks.length; i++){
+                        if(groupLetterBlocks[i].solid && groupLetterBlocks[i].sprite.body.y == brokenPlatformY){
+                            groupLetterBlocks[i].sprite.kill();
+                            groupLetterBlocks[i].assignedLetter.kill();
+                            groupLetterBlocks[i].solid = false;
+                        }
+                    }
                 }
             });
             //Las trampas también tienen que desaparecer
@@ -1201,23 +1218,28 @@ function dashLeft(){
 }
 
 function dashRight(){
-    Dash_Sound.play();
+    let timer = 100;
     BLOCK_SPEED *= 10;
-    blocks.forEach(movementCursorRight, this);
-    traps.forEach(movementCursorRight, this);
-    trapShow.forEach(movementCursorRight, this);
-    powerUps.forEach(movementCursorRight, this);
-    endBlocks.forEach(movementCursorRight, this);
-    explosions.forEach(movementCursorRight,this);
-    walkingenemies.forEach(movementCursorRight,this);
-    capPowerUp.forEach(movementCursorRight,this);
-    shieldPowerUp.forEach(movementCursorRight,this);
-    mineTurtles.forEach(movementCursorRight,this);
-    fallIn.forEach(movementCursorRight,this);
-    fallOut.forEach(movementCursorRight,this);
-    for(let i=0; i<groupLetterBlocks.length; i++)
-        groupLetterBlocks[i].movementRight();
-    if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX*10;
+    while(timer > 0){
+
+        timer--;
+        Dash_Sound.play();
+        blocks.forEach(movementCursorRight, this);
+        traps.forEach(movementCursorRight, this);
+        trapShow.forEach(movementCursorRight, this);
+        powerUps.forEach(movementCursorRight, this);
+        endBlocks.forEach(movementCursorRight, this);
+        explosions.forEach(movementCursorRight,this);
+        walkingenemies.forEach(movementCursorRight,this);
+        capPowerUp.forEach(movementCursorRight,this);
+        shieldPowerUp.forEach(movementCursorRight,this);
+        mineTurtles.forEach(movementCursorRight,this);
+        fallIn.forEach(movementCursorRight,this);
+        fallOut.forEach(movementCursorRight,this);
+        for(let i=0; i<groupLetterBlocks.length; i++)
+            groupLetterBlocks[i].movementRight();
+        if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX*10;
+    }
     BLOCK_SPEED /=10;
 }
 
