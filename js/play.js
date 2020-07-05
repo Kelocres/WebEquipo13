@@ -585,7 +585,7 @@ function createBlock(){
     blockY = 0;
     let hole;
     trapAppearing = 15;
-    incrementTrapAppearing = 3;
+    incrementTrapAppearing = 2;
     powerUpsAppearing = 30;
 
     //For each platform
@@ -891,43 +891,40 @@ function playerHitsBlock(player, block){
                     throwRocks(everyBlock);
                     everyBlock.kill();
                     destroyedBlocks++;
-                    trapShow.forEach(function(trap){
-                        if(trap.body.y = brokenPlatformY){
-                            trap.kill();
-                        }
-                    });
-                    traps.forEach(function(trap){
-                        if(trap.body.y = brokenPlatformY){
-                            trap.kill();
-                        }
-                    });
-                    for(let i = 0; i< groupLetterBlocks.length; i++){
-                        if(groupLetterBlocks[i].solid && groupLetterBlocks[i].sprite.body.y == brokenPlatformY){
-                            groupLetterBlocks[i].sprite.kill();
-                            groupLetterBlocks[i].assignedLetter.kill();
-                            groupLetterBlocks[i].solid = false;
-                        }
-                    }
                 }
             });
             //Las trampas también tienen que desaparecer
             //Puede que aqui toque meter explosión de mina (sonido o usar la funcion para haga tambien anim)
-            traps.forEach(function(everyTrap)
-            {
-                if(everyTrap.body.y == brokenPlatformY)
-                {
-                    everyTrap.kill();
-                    destroyedTraps++;
-                };
+            
+            trapShow.forEach(function(trap){
+                if(Math.abs(trap.body.y - brokenPlatformY) <= 200){
+                    trap.kill();
+                }
             });
-            trapShow.forEach(function(everyShowTrap)
-            {
-                if(everyShowTrap.body.y == brokenPlatformY)
-                {
-                    everyShowTrap.kill();
-                    destroyedShowTraps++;
-                }            
+            traps.forEach(function(trap){
+                if(Math.abs(trap.body.y - brokenPlatformY) <= 200){
+                    trap.kill();
+                }
+            }); 
+            
+            fallIn.forEach(function(tp){
+                if(Math.abs(tp.body.y - brokenPlatformY) <= 200){
+                    tp.kill();
+                }
             });
+            fallOut.forEach(function(tp){
+                if(Math.abs(tp.body.y - brokenPlatformY) <= 200){
+                    tp.kill();
+                }
+            });
+            
+            for(let i = 0; i< groupLetterBlocks.length; i++){
+                if(groupLetterBlocks[i].solid && groupLetterBlocks[i].sprite.body.y == brokenPlatformY){
+                    groupLetterBlocks[i].sprite.kill();
+                    groupLetterBlocks[i].assignedLetter.kill();
+                    groupLetterBlocks[i].solid = false;
+                }
+            }
 
             console.log("Blocks: "+destroyedBlocks+", Traps: "+destroyedTraps+", ShowTraps: "+ destroyedShowTraps);
         }
