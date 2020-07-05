@@ -34,5 +34,5 @@
     "allowTp" : true,
     "dashAllowed": true,
     "trapAppearing": 20,
-    "incrementTrapAppearing": 2
+    "incrementTrapAppearing": 1
 }

@@ -30,9 +30,9 @@
     "letterBlocks" : true,
     "megaPowerUps" : true,
     "movingObstacles" : true,
-    "allowMineTurlte" : true,
+    "allowMineTurlte" : false,
     "allowTp" : false,
     "dashAllowed": false,
-    "trapAppearing": 40,
+    "trapAppearing": 20,
     "incrementTrapAppearing": 0
 }
