@@ -541,6 +541,9 @@ function createBlock(){
     fallIn.callAll('anchor.setTo','anchor',0, 1.0);
 
     //Fall Out
+    //Primero vaciamos el array
+    fallOutArray = [];
+    
     fallOut = game.add.group();
     fallOut.enableBody = true;
     game.physics.arcade.enable(fallOut);
@@ -1018,7 +1021,11 @@ function playerHitsFallInto(player, fallin){
     Portal_Sound.play();
     let maAux = 0;
     let falloutaux = fallOutArray[0];
-    while(maAux < fallOutArray.length && !(fallin.body.y - falloutaux.body.y > 600 && fallin.body.y - falloutaux.body.y < 1500)){
+    while(maAux < fallOutArray.length 
+        && !(fallin.body.y 
+            - falloutaux.body.y > 600 
+            && fallin.body.y - falloutaux.body.y < 1500))
+    {
         falloutaux = fallOutArray[maAux]
         console.log(maAux)
         while(!falloutaux && maAux < fallOutArray.length){
