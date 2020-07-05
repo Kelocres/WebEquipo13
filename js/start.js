@@ -25,6 +25,7 @@ var style = { font: "40px Arial", fill: "#ffffff", align: "left" };
 //Orientación del ratón, modificable en las instrucciones
 let mouseEffect = 1;
 
+
 function cargaAssets() 
 {
     game.load.image('botonSelectName','assets/imgs/New UI/PNG/Buttons/Select_Name.png');

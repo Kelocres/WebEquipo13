@@ -68,6 +68,7 @@ function resetToStart()
     clearInterval(intervalCounting);
     currentLevel = 1;
     defeated = false;
+    PastPlatforms = 0;
 }
 
 function BackToMenu() //Si el contador llega a 0 o se pulsa el botón

@@ -32,5 +32,7 @@
     "movingObstacles" : true,
     "allowMineTurlte" : true,
     "allowTp" : false,
-    "dashAllowed": false
+    "dashAllowed": false,
+    "trapAppearing": 40,
+    "incrementTrapAppearing": 0
 }

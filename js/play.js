@@ -565,8 +565,8 @@ function createBlock(){
 
     blockY = 0;
     let hole;
-    trapAppearing = 15;
-    incrementTrapAppearing = 2;
+    trapAppearing = levelConfig.trapAppearing;
+    incrementTrapAppearing = levelConfig.incrementTrapAppearing;
     powerUpsAppearing = 30;
 
     //For each platform
@@ -583,8 +583,12 @@ function createBlock(){
         }
 
         if(i!=numPlatforms-1)
+        {
             for(var j = 0; j < blocksPerPlatform; j++)
                 setUpBlock(j,hole);
+
+            trapAppearing += incrementTrapAppearing;
+        }
 
         //End of the level
         else
