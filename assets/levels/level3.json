@@ -31,5 +31,6 @@
     "megaPowerUps" : true,
     "movingObstacles" : true,
     "allowMineTurlte" : true,
-    "allowTp" : true
+    "allowTp" : true,
+    "dashAllowed": true
 }

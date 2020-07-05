@@ -152,6 +152,8 @@ let Shield_Sound;
 let Sound_Track;
 let Letter_Block_Sound;
 
+let dashAllowed;
+
 let cameraLimit;
 
 let levelConfig;
@@ -245,6 +247,7 @@ function createPlay(){
     levelsNumber = levelConfig.levelNumber;
     allowMineTurlte = levelConfig.allowMineTurlte;
     allowTp = levelConfig.allowTp;
+    dashAllowed = levelConfig.dashAllowed;
     createPlaySounds();
     createPlayer();
     createCameraBounds();
@@ -1163,6 +1166,15 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
             if(background.x<(-background.x))background.x += backgroundMoveFactorX;
 
         }
+
+        if(dashAllowed){
+            if(dashRightBottom.justDown){
+                dashRight();
+            }
+            else if(dashLeftBottom.justDown){
+                dashLeft();
+            }
+        }
     }  
 }
 
@@ -1198,7 +1210,7 @@ function displayExplosion(trap) {
 
 function dashLeft(){
     Dash_Sound.play();
-    BLOCK_SPEED = BLOCK_SPEED * 10;
+    BLOCK_SPEED = BLOCK_SPEED * 15;
     blocks.forEach(movementCursorLeft, this);
     traps.forEach(movementCursorLeft, this);
     trapShow.forEach(movementCursorLeft, this);
@@ -1214,33 +1226,28 @@ function dashLeft(){
     for(let i=0; i<groupLetterBlocks.length; i++)
         groupLetterBlocks[i].movementLeft();
     if(background.x<(-background.x))background.x += backgroundMoveFactorX*10;
-    BLOCK_SPEED =BLOCK_SPEED/10;
+    BLOCK_SPEED =BLOCK_SPEED/15;
 }
 
 function dashRight(){
-    let timer = 100;
-    BLOCK_SPEED *= 10;
-    while(timer > 0){
-
-        timer--;
-        Dash_Sound.play();
-        blocks.forEach(movementCursorRight, this);
-        traps.forEach(movementCursorRight, this);
-        trapShow.forEach(movementCursorRight, this);
-        powerUps.forEach(movementCursorRight, this);
-        endBlocks.forEach(movementCursorRight, this);
-        explosions.forEach(movementCursorRight,this);
-        walkingenemies.forEach(movementCursorRight,this);
-        capPowerUp.forEach(movementCursorRight,this);
-        shieldPowerUp.forEach(movementCursorRight,this);
-        mineTurtles.forEach(movementCursorRight,this);
-        fallIn.forEach(movementCursorRight,this);
-        fallOut.forEach(movementCursorRight,this);
-        for(let i=0; i<groupLetterBlocks.length; i++)
-            groupLetterBlocks[i].movementRight();
-        if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX*10;
-    }
-    BLOCK_SPEED /=10;
+    Dash_Sound.play();
+    BLOCK_SPEED *= 15;
+    blocks.forEach(movementCursorRight, this);
+    traps.forEach(movementCursorRight, this);
+    trapShow.forEach(movementCursorRight, this);
+    powerUps.forEach(movementCursorRight, this);
+    endBlocks.forEach(movementCursorRight, this);
+    explosions.forEach(movementCursorRight,this);
+    walkingenemies.forEach(movementCursorRight,this);
+    capPowerUp.forEach(movementCursorRight,this);
+    shieldPowerUp.forEach(movementCursorRight,this);
+    mineTurtles.forEach(movementCursorRight,this);
+    fallIn.forEach(movementCursorRight,this);
+    fallOut.forEach(movementCursorRight,this);
+    for(let i=0; i<groupLetterBlocks.length; i++)
+        groupLetterBlocks[i].movementRight();
+    if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX*10;
+    BLOCK_SPEED /=15;
 }
 
 // MOVIMIENTO CON LOS BOTONES
@@ -1297,9 +1304,6 @@ function createKeyControls(){
 function createDashControls(){
     dashLeftBottom = game.input.keyboard.addKey(Phaser.Keyboard.Z);
     dashRightBottom = game.input.keyboard.addKey(Phaser.Keyboard.X);
-
-    dashLeftBottom.onDown.add(dashLeft);
-    dashRightBottom.onDown.add(dashRight);
 }
 
 function playerIsDead()
