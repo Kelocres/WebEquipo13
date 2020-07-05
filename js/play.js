@@ -871,7 +871,55 @@ function managePlayerVelocity(){
     //playerVelocity += playerAcceleration;
 }
 
+function destroyPlatform(brokenPlatformY)
+{
+    Breaking_Blocks_Sound.play();
+    let destroyedBlocks = 0, destroyedTraps = 0, destroyedShowTraps = 0;
+    //brokenPlatformY = block.body.y;
+    blocks.forEach(function(everyBlock)
+    {
+        if(everyBlock.body.y == brokenPlatformY)
+        {
+            throwRocks(everyBlock);
+            everyBlock.kill();
+            //destroyedBlocks++;
+        }
+    });
+    //Las trampas también tienen que desaparecer
+    //Puede que aqui toque meter explosión de mina (sonido o usar la funcion para haga tambien anim)
+    
+    trapShow.forEach(function(trap){
+        if(Math.abs(trap.body.y - brokenPlatformY) <= 200){
+            trap.kill();
+        }
+    });
+    traps.forEach(function(trap){
+        if(Math.abs(trap.body.y - brokenPlatformY) <= 200){
+            trap.kill();
+        }
+    }); 
+    
+    fallIn.forEach(function(tp){
+        if(Math.abs(tp.body.y - brokenPlatformY) <= 200){
+            tp.kill();
+        }
+    });
+    fallOut.forEach(function(tp){
+        if(Math.abs(tp.body.y - brokenPlatformY) <= 200){
+            tp.kill();
+        }
+    });
+    
+    for(let i = 0; i< groupLetterBlocks.length; i++){
+        if(groupLetterBlocks[i].solid && groupLetterBlocks[i].sprite.body.y == brokenPlatformY){
+            groupLetterBlocks[i].sprite.kill();
+            groupLetterBlocks[i].assignedLetter.kill();
+            groupLetterBlocks[i].solid = false;
+        }
+    }
 
+    //console.log("Blocks: "+destroyedBlocks+", Traps: "+destroyedTraps+", ShowTraps: "+ destroyedShowTraps);
+}
 function playerHitsBlock(player, block){
     
     //Que tanto en personaje como los bloques tengan colliders muy finos podrian solucionar el problema de que rebote si da en un lado del bloque
@@ -879,56 +927,9 @@ function playerHitsBlock(player, block){
         Floor_Impact_Sound.play();
         //console.log(block.body.y);
         //Si va más rápido que cierto valor, el bloque se rompe
-        if(player.body.velocity.y >= VELOCITY_BREAKS_BLOCK)
-        {
-            Breaking_Blocks_Sound.play();
-            let destroyedBlocks = 0, destroyedTraps = 0, destroyedShowTraps = 0;
-            brokenPlatformY = block.body.y;
-            blocks.forEach(function(everyBlock)
-            {
-                if(everyBlock.body.y == brokenPlatformY)
-                {
-                    throwRocks(everyBlock);
-                    everyBlock.kill();
-                    destroyedBlocks++;
-                }
-            });
-            //Las trampas también tienen que desaparecer
-            //Puede que aqui toque meter explosión de mina (sonido o usar la funcion para haga tambien anim)
+        if(player.body.velocity.y >= VELOCITY_BREAKS_BLOCK) 
+            destroyPlatform(block.body.y);
             
-            trapShow.forEach(function(trap){
-                if(Math.abs(trap.body.y - brokenPlatformY) <= 200){
-                    trap.kill();
-                }
-            });
-            traps.forEach(function(trap){
-                if(Math.abs(trap.body.y - brokenPlatformY) <= 200){
-                    trap.kill();
-                }
-            }); 
-            
-            fallIn.forEach(function(tp){
-                if(Math.abs(tp.body.y - brokenPlatformY) <= 200){
-                    tp.kill();
-                }
-            });
-            fallOut.forEach(function(tp){
-                if(Math.abs(tp.body.y - brokenPlatformY) <= 200){
-                    tp.kill();
-                }
-            });
-            
-            for(let i = 0; i< groupLetterBlocks.length; i++){
-                if(groupLetterBlocks[i].solid && groupLetterBlocks[i].sprite.body.y == brokenPlatformY){
-                    groupLetterBlocks[i].sprite.kill();
-                    groupLetterBlocks[i].assignedLetter.kill();
-                    groupLetterBlocks[i].solid = false;
-                }
-            }
-
-            console.log("Blocks: "+destroyedBlocks+", Traps: "+destroyedTraps+", ShowTraps: "+ destroyedShowTraps);
-        }
-
         player.body.velocity.y =BOUNCE_CONSTANT;
         //Meter anim aquí
         playerJumpAnimation.play();
@@ -969,6 +970,10 @@ function playerHitsLB(player, letterBlock)
     if(letterBlock.body.touching.up == true)
     {
         Floor_Impact_Sound.play();
+
+        if(player.body.velocity.y >= VELOCITY_BREAKS_BLOCK) 
+            destroyPlatform(letterBlock.body.y);
+
         player.body.velocity.y =BOUNCE_CONSTANT;
         //Meter anim aquí
         playerJumpAnimation.play('flex');
