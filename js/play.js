@@ -1,8 +1,6 @@
 
 const BOUNCE_CONSTANT = -170; // indice de rebote
-//const NUM_BLOCKS = 7;
 let BLOCK_SPEED = 3; // velocidad a la que los bloque se mueven
-//const initBlockX = 80;// width of the block
 const initBlockX = 77;// width of the block
 
 const initBlockY = 450; //400 + half height of the block
@@ -64,7 +62,6 @@ let playerLife;
 //let playerVelocity = 4;
 const playerStandardSpeed = 2;
 let playerAcceleration = playerStandardSpeed;
-//let playerName ="RandomMonster";
 let playerSprite;
 let playerScale = 0.14;
 const spriteDistance = 130;
@@ -168,11 +165,9 @@ let playState = {
 
 function preloadPlay(){
     //Enviroment
-    //game.load.spritesheet('bloque', 'assets/imgs/New enviroment/spritesheet_tileset.png', 107, 107, 300);
     game.load.image('bloque', 'assets/imgs/New enviroment/Tile_13.png');
     game.load.image('spikes', 'assets/imgs/mina/mine1_off_Resize.png');
     game.load.image('spikesCollider', 'assets/imgs/mina/mine1_off_ColliderResize.png');
-    //game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_28.png');
     game.load.image('bloqueLetra', 'assets/imgs/New enviroment/Tile_LetterBlock.png');
     game.load.image('meta', 'assets/imgs/New enviroment/meta.png');
     game.load.image('hello', 'assets/imgs/spaceship.png');
@@ -186,7 +181,6 @@ function preloadPlay(){
     game.load.image('BG_alien_1','assets/imgs/New enviroment/BackGrounds/BG alien 1.jpg');
 
     //Player
-    //game.load.image('player','assets/imgs/New Player/jump/alien_4-jump0Fixed.png');
     game.load.spritesheet('playerSprite','assets/imgs/New Player/jump/player_jump_spritesheet_good.png',441,474,14);
     game.load.image('playerBox','assets/imgs/New Player/jump/playerBox.png');
 
@@ -200,10 +194,7 @@ function preloadPlay(){
 
     //UI
     game.load.image("containerLifeBar", "assets/imgs/New UI/PNG/Main_UI/Health_Bar_Table.png");
-    //game.load.image("bigTextBlock", "assets/imgs/UI/BigTextBlock.png");
     game.load.image("lifeBar", "assets/imgs/New UI/PNG/Main_UI/Boss_HP_Bar_2.png");
-    //game.load.image("redBlock", "assets/imgs/UI/RedBlock.png");
-    //game.load.image("textBlock", "assets/imgs/UI/TextBlock.png");
     game.load.image("playerNameSpace", "assets/imgs/New UI/PNG/Main_UI/Boss_Name_Table.png");
     game.load.image('circularContainer1',"assets/imgs/New UI/PNG/Main_UI/Bonus_BTN_01.png");
     game.load.image('circularContainer2',"assets/imgs/New UI/PNG/Main_UI/Bonus_BTN_02.png");
@@ -214,7 +205,6 @@ function preloadPlay(){
     game.load.image('shield',"assets/imgs/New UI/PNG/Upgrade/Armor_Icon.png");
 
     game.load.text("level",levelsData[currentLevel -1], true);
-    //game.load.text("level",levelsData[1], true);
 
     // load moving obstacle anim
     game.load.spritesheet('mo0',"assets/imgs/Bicho que anda/run/mo.png", 1056, 636, 16);
@@ -239,15 +229,7 @@ function createPlay(){
 
     gameEnded = false;
     console.log("Cargar nivel "+ currentLevel);
-
-    levelConfig = JSON.parse(game.cache.getText('level'));
-    allowLetterBlocks = levelConfig.letterBlocks; 
-    allowMegaPowerUps = levelConfig.megaPowerUps;
-    allowMovingObstacles =levelConfig.movingObstacles;
-    levelsNumber = levelConfig.levelNumber;
-    allowMineTurlte = levelConfig.allowMineTurlte;
-    allowTp = levelConfig.allowTp;
-    dashAllowed = levelConfig.dashAllowed;
+    createLevelConfig();
     createPlaySounds();
     createPlayer();
     createCameraBounds();
@@ -267,10 +249,7 @@ function createPlay(){
 
     playerLife = 100;
     velocidadTope = 0;
-    playerSprite.bringToTop();//Puede que tenga más sentido que no esté así
-    RemainingPlatformsNumber = levelConfig.platforms.length;
-    PastPlatforms = 0;
-    DistanceToNextPlatform = levelConfig.platforms[PastPlatforms].distance;
+    playerSprite.bringToTop();
 
     //Para capturar los valores de las teclas del teclado, cuando haya LetterBlocks
     if(levelConfig.letterBlocks == true)
@@ -313,22 +292,11 @@ function updatePlay(){
     spriteUpdate();
     animationsUpdate();
 
-    //if (background.y< 1536 && background.y>= backgoundBaseY-10) 
     background.y = backgoundBaseY + game.camera.y * backgroundMoveFactorY;
 
-    if(!gameEnded && player.body.velocity.y <= speedthreshold){
-        capPowerUpActive = false;
-        powerUpAccelerateActive = false;
-        shieldPowerUpActived = false;
-    }
-    if(shieldPowerUpActived){
-        capPowerUpActive = false;
-        powerUpAccelerateActive = false;
-    }
-    if(!(powerUpAccelerateActive || capPowerUpActive)){
-        playerAcceleration = playerStandardSpeed;
-    }
+    managePowerUps();
 
+    //Establish camera limits
     if(player.y > cameraLimit){
         game.camera.target = null;
     }
@@ -345,6 +313,17 @@ function createPlayer(){
     playerSprite.scale.setTo(playerScale,playerScale);
     playerSprite.frame = 10;
     playerJumping = false;
+}
+
+function createLevelConfig(){
+    levelConfig = JSON.parse(game.cache.getText('level'));
+    allowLetterBlocks = levelConfig.letterBlocks;
+    allowMegaPowerUps = levelConfig.megaPowerUps;
+    allowMovingObstacles =levelConfig.movingObstacles;
+    levelsNumber = levelConfig.levelNumber;
+    allowMineTurlte = levelConfig.allowMineTurlte;
+    allowTp = levelConfig.allowTp;
+    dashAllowed = levelConfig.dashAllowed;
 }
 
 function createCameraBounds(){
@@ -433,7 +412,10 @@ function createUI(){
     shieldPowerUpIcon.visible = false;
     shieldPowerUpActived = false;//Cambiar luego
 
-    //Messages of winning or losing
+    //Numbers
+    RemainingPlatformsNumber = levelConfig.platforms.length;
+    PastPlatforms = 0;
+    DistanceToNextPlatform = levelConfig.platforms[PastPlatforms].distance;
 
 
 }
@@ -567,7 +549,6 @@ function createBlock(){
     endBlocks.enableBody = true;
     game.physics.arcade.enable(endBlocks);
     endBlocks.createMultiple(blocksPerPlatform, 'meta');
-    //endBlocks.callAll('scale.setTo','scale',1, 2);
 
     walkingenemies = game.add.group();
     walkingenemies.enableBody = true;
@@ -581,9 +562,6 @@ function createBlock(){
 
     //The letterBlocks from level 2
     groupLetterBlocks = [];
-    
-    //allowLetterBlocks = true; 
-    //console.log("allowLetterBlocks "+allowLetterBlocks);
 
     blockY = 0;
     let hole;
@@ -598,9 +576,7 @@ function createBlock(){
         blockY += levelConfig.platforms[i].distance;
         hole = levelConfig.platforms[i].hole;
         blockX = firstBlockX;
-        //trapAppearing += incrementTrapAppearing;
         letterBlockInPlatform = levelConfig.platforms[i].isThereLetter;
-        //console.log("letterBlockInPlatform "+ letterBlockInPlatform);
         if(i>2){
             posFallOut+=levelConfig.platforms[i-3].distance;
             tpNow = true;
@@ -657,8 +633,6 @@ function setUpBlock(currentBlock, hole)
         if(currentBlock == hole)
         {
             delete(item);
-            //console.log("allowLetterBlocks "+levelConfig.letterBlocks);
-            //console.log(levelConfig.letterBlocks==true);
             if(allowLetterBlocks==true && letterBlockInPlatform==true)
             {
                 console.log("Creating LB");
@@ -669,10 +643,8 @@ function setUpBlock(currentBlock, hole)
                 thisLetterBlock.body.checkCollision.up = true;
 
                 //Assigned letter
-                //let letterForBlock = letterArray[Math.floor(Math.random()* letterArray.length)][1];
                 let letterForBlock = letterArray[Math.floor(Math.random()* letterArray.length)];
 
-                //console.log(letterForBlock);
                 let letterText = game.add.text(blockX+40, blockY+20, letterForBlock, styleShowName);
                 game.physics.arcade.enable(letterText);
                 letterText.fontSize = 48;
@@ -813,7 +785,7 @@ function setUpBlock(currentBlock, hole)
                        
                     }
                 }
-                else /*if(allowMovingObstacles)*/{
+                else {
 
                     let wEnemy = walkingenemies.getFirstExists(false);
                     if(wEnemy)
@@ -885,7 +857,6 @@ function destroyPlatform(brokenPlatformY)
         {
             throwRocks(everyBlock);
             everyBlock.kill();
-            //destroyedBlocks++;
         }
     });
     //Las trampas también tienen que desaparecer
@@ -921,20 +892,18 @@ function destroyPlatform(brokenPlatformY)
         }
     }
 
-    //console.log("Blocks: "+destroyedBlocks+", Traps: "+destroyedTraps+", ShowTraps: "+ destroyedShowTraps);
 }
 function playerHitsBlock(player, block){
     
     //Que tanto en personaje como los bloques tengan colliders muy finos podrian solucionar el problema de que rebote si da en un lado del bloque
     if(block.body.touching.up == true){
         Floor_Impact_Sound.play();
-        //console.log(block.body.y);
         //Si va más rápido que cierto valor, el bloque se rompe
         if(player.body.velocity.y >= VELOCITY_BREAKS_BLOCK) 
             destroyPlatform(block.body.y);
             
         player.body.velocity.y =BOUNCE_CONSTANT;
-        //Meter anim aquí
+
         playerJumpAnimation.play();
         playerJumping = true;
     }
@@ -1119,7 +1088,7 @@ function updateText(){
 
 function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, hacer que no se puedan movel los bloques
     if(!blockMovementDissabled){
-        if(cursorRigh.isDown/* || game.input.speed.x > 0*/){
+        if(cursorRigh.isDown){
             blocks.forEach(movementCursorRight, this);
             traps.forEach(movementCursorRight, this);
             trapShow.forEach(movementCursorRight, this);
@@ -1136,7 +1105,7 @@ function manageBlockMovement(){//Si el jugador y el bloque chocan en el lado, ha
                 groupLetterBlocks[i].movementRight();
             if(background.x>(-2048+game.width))background.x -= backgroundMoveFactorX;
         }
-        else if(cursorLeft.isDown/* || game.input.speed.x < 0*/){
+        else if(cursorLeft.isDown){
             blocks.forEach(movementCursorLeft, this);
             traps.forEach(movementCursorLeft, this);
             trapShow.forEach(movementCursorLeft, this);
@@ -1215,6 +1184,22 @@ function displayExplosion(trap) {
     explosion.reset(x, y);
     Explosion_Sound.play();
     explosion.play('explosion', 30, false, true);
+}
+
+function managePowerUps(){
+    if(!gameEnded && player.body.velocity.y <= speedthreshold){
+        capPowerUpActive = false;
+        powerUpAccelerateActive = false;
+        shieldPowerUpActived = false;
+    }
+    if(shieldPowerUpActived){
+        capPowerUpActive = false;
+        powerUpAccelerateActive = false;
+    }
+    if(!(powerUpAccelerateActive || capPowerUpActive)){
+        playerAcceleration = playerStandardSpeed;
+    }
+
 }
 
 function dashLeft(){
